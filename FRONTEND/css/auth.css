@@ -1,0 +1,135 @@
+:root {
+    --primary-red: #cc3300; 
+    --sidebar-red: #ba2f00;
+    --form-bg: #df9e82; 
+    --text-dark: #333333;
+    --font-heading: 'Georgia', serif;
+    --font-body: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: #ffffff;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.corner-decoration {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 150px;
+    height: 150px;
+    background-color: var(--primary-red);
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+    z-index: 1;
+}
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    position: relative;
+    z-index: 2;
+}
+
+.auth-card {
+    background-color: var(--sidebar-red);
+    width: 100%;
+    max-width: 450px;
+    padding: 3rem 2rem;
+    text-align: center;
+    color: white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    animation: scaleUp 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+.auth-card h2 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    font-weight: normal;
+}
+
+.form-group-wrapper {
+    background-color: var(--form-bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    text-align: left;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.input-group {
+    margin-bottom: 1.5rem;
+}
+
+.input-group:last-child {
+    margin-bottom: 0;
+}
+
+.input-group label {
+    display: block;
+    font-family: var(--font-heading);
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: var(--font-body);
+}
+
+.input-group input:focus {
+    outline: 2px solid var(--primary-red);
+}
+
+.auth-btn {
+    background-color: transparent;
+    border: 1px solid #000000;
+    color: white;
+    padding: 0.6rem 3rem;
+    font-size: 1.2rem;
+    font-family: var(--font-heading);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+.auth-btn:hover {
+    background-color: rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.auth-link {
+    color: white;
+    text-decoration: underline;
+    font-size: 0.9rem;
+    transition: opacity 0.3s ease;
+}
+
+.auth-link:hover {
+    opacity: 0.8;
+}
+
+@keyframes scaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

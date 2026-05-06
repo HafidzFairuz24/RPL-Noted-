@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noted! - Main Dashboard</title>
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <style>
+        .header-banner { background-color: var(--primary-red); color: white; padding: 1.5rem 2rem; border-radius: 8px; font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 3rem; }
+        .workspace-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; }
+        .workspace-card { background-color: var(--card-gray); height: 180px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 1.5rem; color: rgba(255, 255, 255, 0.8); text-decoration: none; transition: transform 0.3s; }
+        .workspace-card:hover { transform: translateY(-5px); background-color: #d0d0d0; color: white; }
+        .add-workspace-btn { background-color: var(--primary-red); height: 80px; width: 80px; margin: 50px auto 0 auto; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.3s; color: white; font-size: 3rem; font-weight: 200; text-decoration: none; }
+        .add-workspace-btn:hover { transform: scale(1.1); }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <h1 class="logo">Noted!</h1>
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-btn active">Main Dashboard</a>
+            <a href="profile.html" class="nav-btn">Profile</a>
+            <a href="notification.html" class="nav-btn">Notification</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="../index.html" class="nav-btn" style="display: block;">Log Out</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="header-banner">
+            <h2>Welcome, User.</h2>
+        </div>
+
+        <div class="workspace-grid">
+            <a href="list-dashboard.html" class="workspace-card">Workspace 1</a>
+            <a href="list-dashboard.html" class="workspace-card">Workspace 2</a>
+            <a href="list-dashboard.html" class="workspace-card">Workspace 3</a>
+            <a href="list-dashboard.html" class="workspace-card">Workspace 4</a>
+            <a href="#" class="add-workspace-btn">+</a>
+        </div>
+    </main>
+</body>
+</html>

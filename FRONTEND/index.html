@@ -3,50 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Noted! - Workspace</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Noted! - Task Made Easy</title>
+    <link rel="stylesheet" href="css/landing.css"> 
 </head>
 <body>
-    <div class="app-container">
-        <aside class="sidebar">
-            <h1 class="logo">Noted!</h1>
-            <nav class="nav-menu">
-                <button class="nav-btn active">Main Dashboard</button>
-                <button class="nav-btn">Profile</button>
-                <button class="nav-btn">Notification</button>
-            </nav>
-            <div class="sidebar-footer">
-                <button class="logout-btn">Log Out</button>
-            </div>
-        </aside>
-
-        <main class="main-content">
-            <div class="view-section active" id="dashboard-view">
-                <div class="header-banner animate-slide-down">
-                    <h2>Welcome, User.</h2>
-                </div>
-
-                <div class="workspace-grid">
-                    <div class="workspace-card animate-fade-up" style="animation-delay: 0.1s;">
-                        <h3>Workspace 1</h3>
-                    </div>
-                    <div class="workspace-card animate-fade-up" style="animation-delay: 0.2s;">
-                        <h3>Workspace 2</h3>
-                    </div>
-                    <div class="workspace-card animate-fade-up" style="animation-delay: 0.3s;">
-                        <h3>Workspace 3</h3>
-                    </div>
-                    <div class="workspace-card animate-fade-up" style="animation-delay: 0.4s;">
-                        <h3>Workspace 4</h3>
-                    </div>
-                    
-                    <div class="add-workspace-btn animate-fade-up" style="animation-delay: 0.5s;">
-                        <span class="plus-icon">+</span>
-                    </div>
+    <div class="landing-container">
+        <div class="landing-content">
+            <div class="content-wrapper animate-slide-right">
+                <h1 class="brand-title">Noted!</h1>
+                <p class="brand-subtitle">Task Made Easy, Management Made Easier.</p>
+                
+                <div class="action-group">
+                    <a href="pages/signup.html" class="btn-signup">Sign Up</a>
+                    <a href="pages/login.html" class="link-login">Already have an account? Click here!</a>
                 </div>
             </div>
-        </main>
+        </div>
+        <div class="landing-image"></div>
     </div>
-    <script src="script.js"></script>
 </body>
 </html>
