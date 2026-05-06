@@ -1,1 +1,57 @@
-"<h1>Frontend Project</h1>" 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noted! - Workspace</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <h1 class="logo">Noted!</h1>
+            <nav class="nav-menu">
+                <button class="nav-btn active">Main Dashboard</button>
+                <button class="nav-btn">Profile</button>
+                <button class="nav-btn">Notification</button>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="logout-btn">Log Out</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Dashboard View -->
+            <div class="view-section active" id="dashboard-view">
+                <div class="header-banner animate-slide-down">
+                    <h2>Welcome, User.</h2>
+                </div>
+
+                <div class="workspace-grid">
+                    <!-- Workspace Cards -->
+                    <div class="workspace-card animate-fade-up" style="animation-delay: 0.1s;">
+                        <h3>Workspace 1</h3>
+                    </div>
+                    <div class="workspace-card animate-fade-up" style="animation-delay: 0.2s;">
+                        <h3>Workspace 2</h3>
+                    </div>
+                    <div class="workspace-card animate-fade-up" style="animation-delay: 0.3s;">
+                        <h3>Workspace 3</h3>
+                    </div>
+                    <div class="workspace-card animate-fade-up" style="animation-delay: 0.4s;">
+                        <h3>Workspace 4</h3>
+                    </div>
+                    
+                    <!-- Add Button -->
+                    <div class="add-workspace-btn animate-fade-up" style="animation-delay: 0.5s;">
+                        <span class="plus-icon">+</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
