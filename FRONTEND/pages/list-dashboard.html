@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Noted! - List Dashboard</title>
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <style>
+        .list-header-banner { background-color: var(--sidebar-red); color: white; padding: 2rem; border-radius: 8px; margin-bottom: 2rem; font-family: var(--font-heading); }
+        .list-header-banner h2 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .task-bar { background-color: var(--card-gray); padding: 1.5rem 2rem; border-radius: 8px; margin-bottom: 1rem; font-family: var(--font-heading); font-size: 1.5rem; color: white; display: block; text-decoration: none; transition: transform 0.2s; }
+        .task-bar:hover { transform: scale(1.01); background-color: #d0d0d0; }
+        .add-task-btn { background-color: var(--sidebar-red); width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; color: white; font-size: 2rem; border-radius: 8px; margin: 2rem auto; cursor: pointer; border: none; }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <h1 class="logo">Noted!</h1>
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-btn active">Main Dashboard</a>
+            <a href="profile.html" class="nav-btn">Profile</a>
+            <a href="notification.html" class="nav-btn">Notification</a>
+        </nav>
+        <div class="sidebar-footer"><a href="login.html" class="nav-btn">Log Out</a></div>
+    </aside>
+
+    <main class="main-content">
+        <button class="back-btn">Back</button>
+
+        <div class="list-header-banner">
+            <h2>List 1</h2>
+            <p>Description subheading</p>
+        </div>
+
+        <a href="task-page.html" class="task-bar">Task 1</a>
+        <a href="task-page.html" class="task-bar">Task 2</a>
+        <a href="task-page.html" class="task-bar">Task 3</a>
+        <a href="task-page.html" class="task-bar">Task 4</a>
+
+        <button class="add-task-btn" onclick="window.location.href='task-setting.html'">+</button>
+    </main>
+</body>
+</html>
