@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Noted! - Workspace Setting</title>
+    <link rel="stylesheet" href="../css/auth.css">
+    <style>
+        .auth-card { max-width: 900px; text-align: left; padding: 2rem; }
+        .input-wide { width: 100%; background: var(--bg-cream); color: var(--text-dark); border: none; padding: 1rem; border-radius: 6px; font-family: var(--font-heading); font-size: 1.2rem; margin-bottom: 1rem; }
+        .textarea-wide { width: 100%; background: var(--bg-cream); color: var(--text-dark); border: none; padding: 2rem; border-radius: 6px; font-family: var(--font-heading); font-size: 2.5rem; min-height: 250px; margin-bottom: 1.5rem; resize: none; text-align: center; }
+        .member-section { margin-top: 1rem; font-family: var(--font-heading); font-size: 1.2rem; }
+        .member-btn { background: var(--card-gray); color: var(--text-dark); border: none; padding: 0.5rem 1rem; border-radius: 4px; margin-top: 0.5rem; cursor: pointer; font-family: var(--font-heading); }
+        .member-list { background: var(--card-gray); color: var(--text-dark); padding: 1rem; border-radius: 6px; margin-top: 0.5rem; min-height: 100px; max-width: 450px; font-family: var(--font-heading); display: flex; flex-direction: column; gap: 0.5rem; }
+        .member-row { display: flex; justify-content: space-between; align-items: center; }
+        .member-role { font-size: 0.8rem; font-family: var(--font-body); }
+        .action-buttons { display: flex; justify-content: space-between; margin-top: 2rem; }
+        .btn-action { background: var(--bg-cream); color: var(--text-dark); border: none; padding: 0.6rem 2.5rem; font-size: 1.2rem; border-radius: 4px; cursor: pointer; font-family: var(--font-heading); }
+    </style>
+</head>
+<body>
+    <div class="corner-decoration"></div>
+    <div class="auth-container">
+        <div class="auth-card">
+            <input type="text" class="input-wide" value="Workspace Name">
+            
+            <textarea class="textarea-wide">Workspace Description //(Max 1000 Characters)</textarea>
+            
+            <div class="member-section">
+                <p>Apply Member :</p>
+                <button class="member-btn">Add Member (User id)</button>
+                <div class="member-list">
+                    <div class="member-row"><span>Member 1</span><span class="member-role">Project Manager</span></div>
+                    <div class="member-row"><span>Member 2</span><span class="member-role">Project Manager</span></div>
+                    <div class="member-row"><span>...</span><span class="member-role">Member</span></div>
+                    <div class="member-row"><span>Member n</span><span class="member-role">Member</span></div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn-action" onclick="window.location.href='dashboard.html'">Cancel</button>
+                <button class="btn-action" onclick="window.location.href='dashboard.html'">Add</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
