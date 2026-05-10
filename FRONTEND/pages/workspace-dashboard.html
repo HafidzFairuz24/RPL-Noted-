@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noted! - Workspace Dashboard</title>
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <style>
+        .workspace-header-banner { 
+            background-color: var(--sidebar-red); 
+            color: white; 
+            padding: 2rem; 
+            border-radius: 8px; 
+            margin-bottom: 2rem; 
+            font-family: var(--font-heading);
+            position: relative; 
+        }
+        .workspace-header-banner h2 { 
+            font-size: 2.5rem; 
+            margin-bottom: 0.5rem; 
+        }
+        .owned-by {
+            position: absolute;
+            bottom: 1rem;
+            right: 2rem;
+            font-size: 1.1rem;
+        }
+        .list-bar { 
+            background-color: var(--card-gray); 
+            padding: 1.5rem 2rem; 
+            border-radius: 8px; 
+            margin-bottom: 1rem; 
+            font-family: var(--font-heading); 
+            font-size: 2rem; 
+            color: var(--text-dark); 
+            display: block; 
+            text-decoration: none; 
+            transition: transform 0.2s; 
+        }
+        .list-bar:hover { 
+            transform: scale(1.01); 
+            background-color: #d0d0d0; 
+        }
+        .add-list-btn { 
+            background-color: var(--sidebar-red); 
+            width: 60px; 
+            height: 60px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            color: white; 
+            font-size: 2rem; 
+            border-radius: 8px; 
+            margin: 2rem auto; 
+            cursor: pointer; 
+            border: none; 
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <h1 class="logo">Noted!</h1>
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-btn active">Main Dashboard</a>
+            <a href="profile.html" class="nav-btn">Profile</a>
+            <a href="notification.html" class="nav-btn">Notification</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="../index.html" class="nav-btn" style="display: block;">Log Out</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="workspace-header-banner">
+            <h2>Workspace 1</h2>
+            <p>Description subheading</p>
+            <span class="owned-by">Owned By : Username</span>
+        </div>
+
+        <a href="list-dashboard.html" class="list-bar">List 1</a>
+        <a href="list-dashboard.html" class="list-bar">List 2</a>
+        <a href="list-dashboard.html" class="list-bar">List 3</a>
+
+        <button class="add-list-btn" onclick="window.location.href='list-setting.html'">+</button>
+    </main>
+</body>
+</html>
