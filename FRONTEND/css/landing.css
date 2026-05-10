@@ -1,10 +1,10 @@
 :root {
-    --primary-red: #ce3e12; /* Warna Oranye/Bata Utama (Teks Noted, Tombol) */
-    --sidebar-red: #ce3e12; /* Warna Sidebar & Card Utama */
-    --bg-cream: #fae5d5;    /* Warna Krem Terang (Box Profile, Notif Light) */
-    --form-bg: #e69d7a;     /* Warna Peach Gelap (Bungkus form Log In, Notif Gelap) */
-    --card-gray: #e6e6e6;   /* Warna Abu-abu Terang (Kotak Task/Workspace) */
-    --text-dark: #1a1a1a;   /* Warna Teks Hitam/Gelap */
+    --primary-red: #ce3e12; 
+    --sidebar-red: #ce3e12; 
+    --bg-cream: #fae5d5;    
+    --form-bg: #e69d7a;     
+    --card-gray: #e6e6e6;   
+    --text-dark: #1a1a1a;   
     --font-heading: 'Georgia', serif;
     --font-body: 'Segoe UI', Tahoma, sans-serif;
 }
