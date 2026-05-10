@@ -6,11 +6,40 @@
     <title>Noted! - Notification</title>
     <link rel="stylesheet" href="../css/dashboard.css">
     <style>
-        .notif-container { background-color: var(--sidebar-red); padding: 1.5rem; border-radius: 8px; display: flex; flex-direction: column; gap: 1rem; }
-        .notif-item { background-color: var(--form-bg); padding: 1rem 1.5rem; border-radius: 6px; color: var(--text-dark); font-family: var(--font-heading); }
-        .notif-item.light { background-color: var(--bg-cream); color: var(--text-dark); }
-        .notif-item h3 { font-size: 1.2rem; margin-bottom: 0.3rem; }
-        .notif-item p { font-size: 0.9rem; font-family: var(--font-body); opacity: 0.9; }
+        .top-action-bar { display: flex; justify-content: flex-end; margin-bottom: 1rem; }
+        .btn-back-cream { background-color: var(--bg-cream); color: var(--text-dark); border: none; padding: 0.5rem 2rem; border-radius: 4px; cursor: pointer; font-family: var(--font-heading); }
+
+        .notif-container { 
+            background-color: var(--sidebar-red); 
+            padding: 1.5rem; 
+            border-radius: 8px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 1rem; 
+        }
+
+        /* Style Default: Opacity kecil (meredup) */
+        .notif-item { 
+            background-color: var(--form-bg); 
+            padding: 1.5rem 2rem; 
+            border-radius: 6px; 
+            color: var(--text-dark); 
+            font-family: var(--font-heading); 
+            cursor: pointer;
+            opacity: 0.5; /* Redup secara default */
+            transition: opacity 0.3s ease, background-color 0.3s ease;
+        }
+
+        /* Style Aktif: Opacity terang sendiri */
+        .notif-item.active { 
+            opacity: 1; 
+            background-color: var(--bg-cream);
+        }
+
+        .notif-item h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .notif-item p { font-size: 1.1rem; font-family: var(--font-body); margin: 0; }
+
+        .page-title { color: var(--primary-red); font-family: var(--font-heading); font-size: 2.5rem; margin-bottom: 1.5rem; }
     </style>
 </head>
 <body>
@@ -27,30 +56,45 @@
     </aside>
 
     <main class="main-content">
+        <div class="top-action-bar">
+            <button class="btn-back-cream" onclick="window.location.href='dashboard.html'">Back</button>
+        </div>
+        
         <h2 class="page-title">Notification.</h2>
-        <button class="back-btn" onclick="window.location.href='dashboard.html'">Back</button>
 
         <div class="notif-container">
-            <div class="notif-item light">
+            <div class="notif-item active" onclick="focusNotif(this)">
                 <h3>Notification Heading 1</h3>
                 <p>Notification Description (Max 150 / 200 Characters)</p>
             </div>
-            
-            <div class="notif-item">
+
+            <div class="notif-item" onclick="focusNotif(this)">
                 <h3>Notification Heading 2</h3>
                 <p>Notification Description (Max 150 / 200 Characters)</p>
             </div>
-            
-            <div class="notif-item">
+
+            <div class="notif-item" onclick="focusNotif(this)">
                 <h3>Notification Heading 3</h3>
                 <p>Notification Description (Max 150 / 200 Characters)</p>
             </div>
-            
-            <div class="notif-item">
-                <h3>Notification Heading n</h3>
+
+            <div class="notif-item" onclick="focusNotif(this)">
+                <h3>Notification Heading 4</h3>
                 <p>Notification Description (Max 150 / 200 Characters)</p>
             </div>
         </div>
     </main>
+
+    <script>
+        function focusNotif(element) {
+            // Hapus kelas 'active' dari semua box agar semuanya meredup
+            document.querySelectorAll('.notif-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Tambahkan kelas 'active' hanya pada box yang baru diklik agar terang sendiri
+            element.classList.add('active');
+        }
+    </script>
 </body>
 </html>

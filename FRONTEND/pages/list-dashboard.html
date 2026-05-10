@@ -11,6 +11,26 @@
         .task-bar:hover { transform: scale(1.01); background-color: #d0d0d0; }
         .add-task-btn { background-color: var(--sidebar-red); width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; color: white; font-size: 2rem; border-radius: 8px; margin: 2rem auto; cursor: pointer; border: none; transition: transform 0.2s;}
         .add-task-btn:hover { transform: scale(1.1); }
+
+        /* Tambahan Style untuk tombol Back agar sesuai desain */
+        .top-action-bar { 
+            display: flex; 
+            justify-content: flex-end; 
+            margin-bottom: 1rem; 
+        }
+
+        .btn-back-cream { 
+            background-color: var(--bg-cream); 
+            color: var(--text-dark); 
+            border: none; 
+            padding: 0.5rem 2rem; 
+            font-size: 1.2rem; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-family: var(--font-heading); 
+            transition: transform 0.2s; 
+        }
+        .btn-back-cream:hover { transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -25,7 +45,9 @@
     </aside>
 
     <main class="main-content">
-        <button class="back-btn">Back</button>
+        <div class="top-action-bar">
+            <button class="btn-back-cream" onclick="window.location.href='workspace-dashboard.html'">Back</button>
+        </div>
 
         <div class="list-header-banner">
             <h2>List 1</h2>
