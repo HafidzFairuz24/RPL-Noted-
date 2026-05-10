@@ -5,14 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Noted! - Main Dashboard</title>
     <link rel="stylesheet" href="../css/dashboard.css">
-    <style>
-        .header-banner { background-color: var(--primary-red); color: white; padding: 1.5rem 2rem; border-radius: 8px; font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 3rem; }
-        .workspace-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; }
-        .workspace-card { background-color: var(--card-gray); height: 180px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 1.5rem; color: rgba(255, 255, 255, 0.8); text-decoration: none; transition: transform 0.3s; }
-        .workspace-card:hover { transform: translateY(-5px); background-color: #d0d0d0; color: white; }
-        .add-workspace-btn { background-color: var(--primary-red); height: 80px; width: 80px; margin: 50px auto 0 auto; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.3s; color: white; font-size: 3rem; font-weight: 200; text-decoration: none; }
-        .add-workspace-btn:hover { transform: scale(1.1); }
-    </style>
+   <style>
+    .header-banner { 
+        background-color: var(--primary-red); 
+        color: white; 
+        padding: 1.5rem 2rem; 
+        border-radius: 8px; 
+        font-family: var(--font-heading); 
+        font-size: 1.5rem; 
+        margin-bottom: 3rem; 
+    }
+    
+    .workspace-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+        gap: 2rem; 
+    }
+    
+    .workspace-card { 
+        background-color: var(--card-gray); 
+        height: 180px; 
+        border-radius: 8px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-family: var(--font-heading); 
+        font-size: 1.5rem; 
+        color: var(--text-dark);
+        text-decoration: none; 
+        transition: transform 0.3s, background-color 0.3s; 
+    }
+    
+    .workspace-card:hover { 
+        transform: translateY(-5px); 
+        background-color: #d8d8d8; 
+        color: var(--text-dark); 
+    }
+    
+    .add-workspace-btn { 
+        background-color: var(--primary-red); 
+        height: 80px; 
+        width: 80px; 
+        margin: 50px auto 0 auto; 
+        border-radius: 8px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        cursor: pointer; 
+        transition: transform 0.3s; 
+        color: white; 
+        font-size: 3rem; 
+        font-weight: 200; 
+        text-decoration: none; 
+    }
+    
+    .add-workspace-btn:hover { 
+        transform: scale(1.1); 
+    }
+</style>
 </head>
 <body>
     <aside class="sidebar">
