@@ -1,11 +1,5 @@
-// ============================================================
-// api.js  –  Noted! Frontend API Helper
-// Place this file in your frontend root as: js/api.js
-// Then include it in every HTML page BEFORE other scripts:
-//   <script src="../js/api.js"></script>
-// ============================================================
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://rpl-noted-production.up.railway.app/api';
 
 // ── Token helpers ────────────────────────────────────────────
 const Auth = {
