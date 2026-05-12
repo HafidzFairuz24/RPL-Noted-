@@ -40,14 +40,28 @@
             font-family: var(--font-heading); font-size: 1rem;
             margin-bottom: 0.8rem; outline: none;
         }
-        .input-assign {
-            width: 100%; background: var(--bg-cream); color: var(--text-dark);
-            border: none; padding: 0.7rem 1rem; border-radius: 6px;
-            font-family: var(--font-heading); font-size: 1rem; outline: none;
-            margin-bottom: 0.5rem;
+
+        .assignees-box {
+            background: var(--bg-cream); color: var(--text-dark);
+            padding: 1rem; border-radius: 6px; max-height: 200px; overflow-y: auto;
+            font-family: var(--font-heading); font-size: 1rem;
         }
-        .input-assign::placeholder { color: var(--text-dark); opacity: 0.5; }
-        .assign-hint { font-family: var(--font-heading); font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+        .assignee-item { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .assignee-item input { transform: scale(1.2); cursor: pointer; }
+
+        /* Image upload */
+        .img-upload-section { margin-bottom: 1.5rem; }
+        .img-upload-label { color: white; font-family: var(--font-heading); font-size: 1.1rem; margin-bottom: 0.5rem; display: block; }
+        .img-upload-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        .btn-upload-img {
+            background: var(--card-gray); color: var(--text-dark); border: none;
+            padding: 0.6rem 1.5rem; border-radius: 6px; cursor: pointer;
+            font-family: var(--font-heading); font-size: 1rem; transition: background 0.2s;
+        }
+        .btn-upload-img:hover { background: #c0c0c0; }
+        .img-preview { width: 120px; height: 70px; border-radius: 8px; object-fit: cover; border: 2px solid rgba(255,255,255,0.3); display: none; }
+        .btn-remove-img { background: none; border: none; color: #ff6b6b; cursor: pointer; font-family: var(--font-heading); font-size: 0.9rem; display: none; }
+        #img-file-input { display: none; }
 
         .action-buttons { display: flex; justify-content: space-between; margin-top: 2rem; align-items: center; }
         .btn-action {
@@ -74,6 +88,17 @@
             <input type="text" class="input-wide" id="task-title" placeholder="Task Name">
             <textarea class="textarea-wide" id="task-desc" placeholder="Task Description //(Max 1000 Characters)" maxlength="1000"></textarea>
 
+            <!-- Attachment Upload -->
+            <div class="img-upload-section">
+                <label class="img-upload-label">📎 Lampiran Gambar (Max 3MB):</label>
+                <div class="img-upload-row">
+                    <button class="btn-upload-img" type="button" onclick="document.getElementById('img-file-input').click()">Pilih Gambar</button>
+                    <input type="file" id="img-file-input" accept="image/*" onchange="handleImgUpload(event)">
+                    <img id="img-preview" class="img-preview" alt="preview">
+                    <button class="btn-remove-img" id="btn-remove-img" type="button" onclick="removeImg()">✕ Hapus</button>
+                </div>
+            </div>
+
             <div class="grid-2col">
                 <div>
                     <p class="section-title" style="margin-top:0;">Status:</p>
@@ -94,18 +119,19 @@
                     <input type="date" class="input-date" id="task-deadline">
                 </div>
                 <div>
-                    <p class="section-title" style="margin-top:0;">Assign Member (Email):</p>
-                    <input type="email" class="input-assign" id="task-assign-email" placeholder="Email member...">
-                    <p class="assign-hint">Kosongkan jika tidak di-assign.</p>
+                    <p class="section-title" style="margin-top:0;">Assign Members:</p>
+                    <div class="assignees-box" id="assignees-container">
+                        <p style="opacity:0.5; font-size:0.9rem;">Memuat daftar member...</p>
+                    </div>
                 </div>
             </div>
 
             <p id="error-task"></p>
 
             <div class="action-buttons">
-                <div style="display:flex; gap:0.8rem;">
+                <div>
                     <button class="btn-action" id="btn-cancel">Cancel</button>
-                    <button class="btn-action danger" id="btn-delete" style="display:none;" onclick="deleteTask()">🗑 Hapus Task</button>
+                    <button class="btn-action danger" id="btn-delete" style="display:none; margin-left:1rem;" onclick="deleteTask()">🗑 Hapus Task</button>
                 </div>
                 <button class="btn-action primary" id="btn-submit" onclick="submitTask()">Buat Task</button>
             </div>
@@ -118,93 +144,185 @@
         const params      = new URLSearchParams(window.location.search);
         const workspaceId = params.get('workspaceId');
         const listId      = params.get('listId');
-        const taskId      = params.get('taskId');
-        const isEditMode  = params.get('mode') === 'edit' && !!taskId;
+        const taskId      = params.get('taskId'); // ada = edit mode
+        const isEditMode  = !!taskId;
+        const currentUser = Auth.getUser();
+
+        let selectedImage = null; // base64 attachment
 
         if (!workspaceId || !listId) { window.location.href = 'dashboard.html'; }
 
-        function backToList() {
-            window.location.href = `list-dashboard.html?workspaceId=${workspaceId}&listId=${listId}`;
-        }
+        document.getElementById('btn-cancel').onclick = function() {
+            if (isEditMode) {
+                window.location.href = `task-page.html?workspaceId=${workspaceId}&listId=${listId}&taskId=${taskId}`;
+            } else {
+                window.location.href = `list-dashboard.html?workspaceId=${workspaceId}&listId=${listId}`;
+            }
+        };
 
-        document.getElementById('btn-cancel').onclick = backToList;
-
-        // Setup mode
         if (isEditMode) {
-            document.getElementById('page-heading').textContent  = 'Edit Task';
-            document.getElementById('btn-submit').textContent    = 'Simpan Perubahan';
-            document.getElementById('btn-delete').style.display  = 'inline-block';
-            loadExistingTask();
+            document.getElementById('page-heading').textContent = 'Edit Task';
+            document.getElementById('btn-submit').textContent   = 'Simpan Perubahan';
+            document.getElementById('btn-delete').style.display = 'inline-block';
         }
 
-        async function loadExistingTask() {
+        async function init() {
             try {
-                const res  = await TaskAPI.getOne(listId, taskId);
-                const task = res.task || res.data || res;
+                // 1. Check role
+                const wsRes = await WorkspaceAPI.getOne(workspaceId);
+                const ws = wsRes.workspace || wsRes.data || wsRes;
+                let myRole = 'member';
+                if (currentUser && ws.members) {
+                    const me = ws.members.find(m => m.id === currentUser.id);
+                    if (me) myRole = me.role;
+                }
 
-                document.getElementById('task-title').value  = task.title       || '';
-                document.getElementById('task-desc').value   = task.description || '';
-                document.getElementById('task-status').value = task.status       || 'todo';
-                document.getElementById('task-priority').value = task.priority   || 'medium';
+                if (myRole === 'member') {
+                    alert('Hanya Manager atau Owner yang dapat mengedit task penuh.');
+                    window.location.href = `list-dashboard.html?workspaceId=${workspaceId}&listId=${listId}`;
+                    return;
+                }
 
-                if (task.due_date) {
-                    // Format YYYY-MM-DD untuk input[type=date]
-                    document.getElementById('task-deadline').value = task.due_date.split('T')[0];
+                // 2. Render assignee checkboxes
+                const assigneeBox = document.getElementById('assignees-container');
+                assigneeBox.innerHTML = '';
+                if (ws.members && ws.members.length > 0) {
+                    ws.members.forEach(m => {
+                        const div = document.createElement('div');
+                        div.className = 'assignee-item';
+                        div.innerHTML = `
+                            <input type="checkbox" id="chk-${m.id}" value="${m.id}">
+                            <label for="chk-${m.id}">${m.username} <span style="font-size:0.8rem; opacity:0.6;">(${m.email})</span></label>
+                        `;
+                        assigneeBox.appendChild(div);
+                    });
+                } else {
+                    assigneeBox.innerHTML = '<p style="opacity:0.5; font-size:0.9rem;">Tidak ada member di workspace ini.</p>';
+                }
+
+                // 3. Load task data if edit mode
+                if (isEditMode) {
+                    const res  = await TaskAPI.getOne(listId, taskId);
+                    const task = res.task || res.data || res;
+
+                    document.getElementById('task-title').value = task.title || '';
+                    document.getElementById('task-desc').value  = task.description || '';
+                    if (task.status) document.getElementById('task-status').value = task.status;
+                    if (task.priority) document.getElementById('task-priority').value = task.priority;
+                    if (task.due_date) {
+                        const d = new Date(task.due_date);
+                        if (!isNaN(d.getTime())) {
+                            document.getElementById('task-deadline').value = d.toISOString().split('T')[0];
+                        }
+                    }
+
+                    // Pre-check assignees
+                    if (task.assignees && Array.isArray(task.assignees)) {
+                        task.assignees.forEach(a => {
+                            const chk = document.getElementById(`chk-${a.id}`);
+                            if (chk) chk.checked = true;
+                        });
+                    }
+
+                    // Attachment
+                    if (task.attachment) {
+                        selectedImage = task.attachment;
+                        showPreview(task.attachment);
+                    }
                 }
             } catch (err) {
-                document.getElementById('error-task').textContent = 'Gagal memuat task: ' + err.message;
-                document.getElementById('error-task').style.display = 'block';
+                alert('Gagal inisialisasi: ' + err.message);
             }
         }
 
+        // ── Image upload ──────────────────────────────────────────────
+        function handleImgUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (file.size > 3 * 1024 * 1024) { alert('Ukuran gambar maksimal 3MB.'); return; }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                selectedImage = e.target.result;
+                showPreview(selectedImage);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function showPreview(src) {
+            const img = document.getElementById('img-preview');
+            const btn = document.getElementById('btn-remove-img');
+            img.src = src; img.style.display = 'block'; btn.style.display = 'inline-block';
+        }
+
+        function removeImg() {
+            selectedImage = null;
+            document.getElementById('img-preview').style.display = 'none';
+            document.getElementById('btn-remove-img').style.display = 'none';
+            document.getElementById('img-file-input').value = '';
+        }
+
+        // ── Delete Task ───────────────────────────────────────────────
+        async function deleteTask() {
+            if (!confirm('Hapus task ini secara permanen?')) return;
+            try {
+                await TaskAPI.delete(listId, taskId);
+                window.location.href = `list-dashboard.html?workspaceId=${workspaceId}&listId=${listId}`;
+            } catch (err) {
+                alert('Gagal menghapus: ' + (err.message || ''));
+            }
+        }
+
+        // ── Submit ────────────────────────────────────────────────────
         async function submitTask() {
-            const title       = document.getElementById('task-title').value.trim();
-            const description = document.getElementById('task-desc').value.trim();
-            const status      = document.getElementById('task-status').value;
-            const priority    = document.getElementById('task-priority').value;
-            const due_date    = document.getElementById('task-deadline').value;
+            const title    = document.getElementById('task-title').value.trim();
+            const desc     = document.getElementById('task-desc').value.trim();
+            const status   = document.getElementById('task-status').value;
+            const priority = document.getElementById('task-priority').value;
+            const deadline = document.getElementById('task-deadline').value;
+            
+            // Get checked assignees
+            const assignees = [];
+            const checkboxes = document.querySelectorAll('#assignees-container input[type="checkbox"]:checked');
+            checkboxes.forEach(chk => assignees.push(parseInt(chk.value)));
 
-            const btn   = document.getElementById('btn-submit');
             const errEl = document.getElementById('error-task');
-
             errEl.style.display = 'none';
+
             if (!title) { errEl.textContent = 'Nama task wajib diisi.'; errEl.style.display = 'block'; return; }
 
-            btn.disabled    = true;
-            btn.textContent = isEditMode ? 'Menyimpan...' : 'Membuat...';
-
-            const taskData = {
+            const payload = {
                 title,
-                description: description || undefined,
+                description: desc,
                 status,
                 priority,
-                due_date: due_date || undefined,
+                due_date: deadline || null,
+                assignees: assignees,
+                attachment: selectedImage
             };
+
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = true;
+            btn.textContent = isEditMode ? 'Menyimpan...' : 'Membuat...';
 
             try {
                 if (isEditMode) {
-                    await TaskAPI.update(listId, taskId, taskData);
+                    await TaskAPI.update(listId, taskId, payload);
+                    window.location.href = `task-page.html?workspaceId=${workspaceId}&listId=${listId}&taskId=${taskId}`;
                 } else {
-                    await TaskAPI.create(listId, taskData);
+                    const res = await TaskAPI.create(listId, payload);
+                    const newId = res.taskId || res.id;
+                    window.location.href = `list-dashboard.html?workspaceId=${workspaceId}&listId=${listId}`;
                 }
-                backToList();
             } catch (err) {
-                errEl.textContent   = (isEditMode ? 'Gagal menyimpan: ' : 'Gagal membuat: ') + (err.message || 'Unknown error');
+                errEl.textContent = 'Gagal: ' + (err.message || 'Unknown error');
                 errEl.style.display = 'block';
-                btn.disabled        = false;
-                btn.textContent     = isEditMode ? 'Simpan Perubahan' : 'Buat Task';
+                btn.disabled = false;
+                btn.textContent = isEditMode ? 'Simpan Perubahan' : 'Buat Task';
             }
         }
 
-        async function deleteTask() {
-            if (!confirm('Hapus task ini?')) return;
-            try {
-                await TaskAPI.delete(listId, taskId);
-                backToList();
-            } catch (err) {
-                alert('Gagal menghapus task: ' + (err.message || 'Unknown error'));
-            }
-        }
+        init();
     </script>
 </body>
 </html>

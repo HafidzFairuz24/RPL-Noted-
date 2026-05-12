@@ -18,16 +18,13 @@
         /* Task header */
         .task-header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 1.5rem; font-family: var(--font-heading); gap: 1rem;
+            margin-bottom: 1.5rem; font-family: var(--font-heading); gap: 1rem; flex-wrap: wrap;
         }
-        .input-task-name {
-            background: transparent; border: none; color: white;
-            font-family: var(--font-heading); font-size: 2rem;
-            width: 60%; outline: none;
+        .task-title-display {
+            color: white; font-size: 2rem; margin: 0; word-break: break-word; flex: 1;
         }
-        .input-task-name::placeholder { color: white; opacity: 0.5; }
 
-        .task-action-row { display: flex; gap: 0.6rem; flex-shrink: 0; }
+        .task-action-row { display: flex; gap: 0.6rem; flex-shrink: 0; align-items: center; }
 
         .btn-back {
             background: var(--bg-cream); color: var(--text-dark); border: none;
@@ -40,21 +37,21 @@
             background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4);
             padding: 0.5rem 1.2rem; font-size: 0.95rem; border-radius: 4px;
             cursor: pointer; font-family: var(--font-heading); transition: background 0.2s;
+            display: none; /* hidden by default, shown if manager/owner */
         }
         .btn-edit-task:hover { background: rgba(255,255,255,0.35); }
 
         .textarea-wide {
             width: 100%; background: var(--bg-cream); color: var(--text-dark);
             border: none; padding: 2rem; border-radius: 6px;
-            font-family: var(--font-heading); font-size: 1.2rem; opacity: 0.7;
-            min-height: 250px; margin-bottom: 1.5rem; resize: none; outline: none;
+            font-family: var(--font-heading); font-size: 1.2rem; opacity: 0.9;
+            min-height: 150px; margin-bottom: 1.5rem; resize: none; outline: none;
         }
-        .textarea-wide::placeholder { color: var(--text-dark); opacity: 0.5; }
 
         /* Task meta info */
         .task-meta {
-            display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;
-            font-family: var(--font-heading);
+            display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;
+            font-family: var(--font-heading); align-items: center;
         }
         .meta-item {
             background: rgba(255,255,255,0.15); padding: 0.4rem 1rem;
@@ -66,21 +63,33 @@
         .meta-item.status-done     { background: rgba(39,174,96,0.5); }
         .meta-item.status-progress { background: rgba(52,152,219,0.4); }
 
+        .assignee-badge {
+            background: var(--bg-cream); color: var(--text-dark);
+            padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem;
+            display: flex; align-items: center; gap: 0.3rem;
+        }
+        .assignee-badge::before { content: '👤'; }
+
         .deadline-section {
             display: flex; align-items: center; gap: 1rem;
-            font-family: var(--font-heading); font-size: 1.1rem; color: white;
-            margin-bottom: 1.5rem;
+            font-family: var(--font-heading); font-size: 1rem; color: white;
+            margin-bottom: 1.5rem; background: rgba(0,0,0,0.2); padding: 0.5rem 1rem; border-radius: 8px;
         }
-        .deadline-badge {
-            background: var(--card-gray); color: var(--text-dark);
-            padding: 0.3rem 1rem; border-radius: 4px; font-size: 1rem;
+        
+        .attachment-section {
+            margin-bottom: 2rem;
+            display: none;
+        }
+        .attachment-img {
+            max-width: 100%; max-height: 400px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.2);
+            object-fit: contain; background: rgba(0,0,0,0.3);
         }
 
         .btn-done {
             background: var(--bg-cream); color: var(--text-dark); border: none;
             padding: 0.6rem 2rem; font-size: 1rem; border-radius: 4px;
             cursor: pointer; font-family: var(--font-heading); transition: transform 0.2s;
-            display: block; margin-left: auto;
+            display: block; margin-left: auto; margin-bottom: 2rem;
         }
         .btn-done:hover { transform: scale(1.05); }
         .btn-done.is-done { background: #27ae60; color: white; }
@@ -98,153 +107,191 @@
             padding: 1rem 1.5rem; margin-bottom: 0.8rem; color: white;
             font-family: var(--font-heading); position: relative;
         }
-        .comment-author { font-size: 0.9rem; opacity: 0.7; margin-bottom: 0.3rem; }
-        .comment-content { font-size: 1.1rem; }
+        .comment-author { font-size: 0.85rem; opacity: 0.7; margin-bottom: 0.4rem; }
+        .comment-content { font-size: 1rem; line-height: 1.4; white-space: pre-wrap; }
         .comment-actions {
-            position: absolute; top: 0.8rem; right: 1rem;
-            display: flex; gap: 0.5rem;
+            position: absolute; top: 1rem; right: 1.5rem; display: flex; gap: 0.5rem;
         }
         .btn-comment-action {
-            background: none; border: none; cursor: pointer; font-size: 0.85rem;
-            opacity: 0.6; transition: opacity 0.2s; color: white;
-            font-family: var(--font-heading); padding: 0.2rem 0.5rem;
-            border-radius: 4px;
+            background: none; border: none; color: white; opacity: 0.6; cursor: pointer;
+            font-size: 0.85rem; padding: 0; font-family: var(--font-heading); transition: opacity 0.2s;
         }
-        .btn-comment-action:hover { opacity: 1; background: rgba(255,255,255,0.15); }
+        .btn-comment-action:hover { opacity: 1; }
 
-        /* Edit comment inline */
-        .comment-edit-area {
-            width: 100%; background: rgba(255,255,255,0.15); border: none;
-            color: white; padding: 0.5rem; border-radius: 4px;
-            font-family: var(--font-heading); font-size: 1rem; outline: none;
-            resize: none; margin-top: 0.5rem; display: none;
+        .comment-input-area {
+            display: flex; gap: 1rem; margin-top: 1.5rem;
         }
-        .comment-edit-row { display: none; gap: 0.5rem; margin-top: 0.5rem; }
-        .btn-save-comment, .btn-cancel-comment {
-            background: rgba(255,255,255,0.2); color: white; border: none;
-            padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer;
-            font-family: var(--font-heading); font-size: 0.85rem; transition: background 0.2s;
-        }
-        .btn-save-comment:hover   { background: rgba(255,255,255,0.35); }
-        .btn-cancel-comment:hover { background: rgba(255,0,0,0.3); }
-
-        /* Comment form */
-        .comment-form { display: flex; gap: 0.8rem; margin-top: 1rem; }
-        .comment-input {
-            flex: 1; background: rgba(255,255,255,0.15); border: none;
-            border-radius: 6px; padding: 0.8rem 1rem; color: white;
+        .comment-input-area input {
+            flex: 1; background: var(--bg-cream); color: var(--text-dark);
+            border: none; padding: 1rem; border-radius: 20px;
             font-family: var(--font-heading); font-size: 1rem; outline: none;
         }
-        .comment-input::placeholder { color: rgba(255,255,255,0.5); }
-        .btn-comment {
+        .btn-send-comment {
             background: var(--bg-cream); color: var(--text-dark); border: none;
-            padding: 0.8rem 1.5rem; border-radius: 6px; cursor: pointer;
+            padding: 0 1.5rem; border-radius: 20px; font-size: 1rem; cursor: pointer;
             font-family: var(--font-heading); transition: transform 0.2s;
         }
-        .btn-comment:hover { transform: scale(1.05); }
+        .btn-send-comment:hover { transform: scale(1.05); }
 
-        #error-task { color: #ff6b6b; font-family: var(--font-heading); padding: 0.5rem; display: none; }
+        .comment-edit-area {
+            width: 100%; background: rgba(0,0,0,0.2); color: white;
+            border: 1px solid rgba(255,255,255,0.3); padding: 0.8rem; border-radius: 6px;
+            font-family: var(--font-heading); font-size: 1rem; resize: none; outline: none;
+            display: none; margin-top: 0.5rem;
+        }
+        .comment-edit-row { display: none; gap: 0.5rem; margin-top: 0.5rem; }
+        .btn-save-comment { background: #27ae60; color: white; border: none; padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; }
+        .btn-cancel-comment { background: #c0392b; color: white; border: none; padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; }
+
+        #error-task { color: #ff6b6b; font-family: var(--font-heading); text-align: center; margin-top: 2rem; display: none; }
     </style>
 </head>
 <script src="../js/api.js"></script>
 <body>
     <div class="corner-decoration"></div>
     <div class="auth-container">
+        
         <div class="auth-card">
-            <!-- Header: nama task + tombol -->
             <div class="task-header">
-                <input type="text" class="input-task-name" id="task-name-input" placeholder="Task Name" readonly>
+                <h2 class="task-title-display" id="task-title">Memuat...</h2>
                 <div class="task-action-row">
-                    <button class="btn-edit-task" onclick="goToEditTask()">✏️ Edit Task</button>
-                    <button class="btn-back" id="back-btn">Back</button>
+                    <button class="btn-back" id="btn-back">Kembali</button>
+                    <button class="btn-edit-task" id="btn-edit-task">✏️ Edit</button>
                 </div>
             </div>
 
-            <p id="error-task"></p>
-
-            <!-- Meta: status + priority -->
-            <div class="task-meta" id="task-meta"></div>
-
-            <!-- Deskripsi (read-only di halaman ini) -->
-            <textarea class="textarea-wide" id="task-desc" placeholder="Tidak ada deskripsi." readonly></textarea>
-
-            <!-- Deadline -->
-            <div class="deadline-section">
-                <p>📅 Deadline:</p>
-                <span class="deadline-badge" id="deadline-display">-</span>
+            <div class="task-meta" id="task-meta">
+                <!-- Badges will be rendered here -->
             </div>
 
-            <!-- Mark as done -->
+            <div class="deadline-section" id="deadline-section" style="display:none;">
+                <span>📅 Deadline:</span>
+                <span class="deadline-badge" id="task-deadline"></span>
+            </div>
+
+            <textarea class="textarea-wide" id="task-desc" readonly></textarea>
+
+            <!-- Attachment Section -->
+            <div class="attachment-section" id="attachment-section">
+                <p style="font-family:var(--font-heading); color:white; margin-bottom:0.5rem;">📎 Lampiran:</p>
+                <img id="task-attachment" class="attachment-img" alt="Attachment">
+            </div>
+
             <button class="btn-done" id="btn-done" onclick="toggleDone()">Mark as done</button>
+
+            <p id="error-task"></p>
         </div>
 
-        <!-- Comments -->
-        <h3 class="comment-text">Comment:</h3>
+        <h2 class="comment-text">Komentar</h2>
         <div class="comment-section">
-            <div id="comment-list"></div>
-            <div class="comment-form">
-                <input type="text" class="comment-input" id="comment-input" placeholder="Tulis komentar...">
-                <button class="btn-comment" onclick="submitComment()">Kirim</button>
+            <div id="comment-list">
+                <p style="color:rgba(255,255,255,0.5);font-family:var(--font-heading);">Memuat komentar...</p>
+            </div>
+            <div class="comment-input-area">
+                <input type="text" id="comment-input" placeholder="Tulis komentar...">
+                <button class="btn-send-comment" onclick="submitComment()">Kirim</button>
             </div>
         </div>
+
     </div>
 
     <script>
         requireAuth();
-
+        const currentUser = Auth.getUser();
         const params      = new URLSearchParams(window.location.search);
         const workspaceId = params.get('workspaceId');
         const listId      = params.get('listId');
         const taskId      = params.get('taskId');
 
-        if (!listId || !taskId) { window.location.href = 'dashboard.html'; }
+        let currentTaskStatus = 'todo';
+        let myRole = 'member'; // Default to least privilege
 
-        const currentUser = Auth.getUser();
+        if (!workspaceId || !listId || !taskId) {
+            window.location.href = 'dashboard.html';
+        }
 
-        // Back button
-        document.getElementById('back-btn').onclick = function() {
+        document.getElementById('btn-back').onclick = function() {
             window.location.href = `list-dashboard.html?workspaceId=${workspaceId}&listId=${listId}`;
         };
 
-        // Edit Task → task-setting dalam mode edit
-        function goToEditTask() {
+        document.getElementById('btn-edit-task').onclick = function() {
             window.location.href = `task-setting.html?workspaceId=${workspaceId}&listId=${listId}&taskId=${taskId}&mode=edit`;
-        }
+        };
 
-        // ── Load Task ─────────────────────────────────────────────────
-        let currentTaskStatus = 'todo';
+        async function init() {
+            try {
+                // Get role
+                const wsRes = await WorkspaceAPI.getOne(workspaceId);
+                const ws = wsRes.workspace || wsRes.data || wsRes;
+                if (currentUser && ws.members) {
+                    const me = ws.members.find(m => m.id === currentUser.id);
+                    if (me) myRole = me.role;
+                }
+
+                if (myRole === 'owner' || myRole === 'manager') {
+                    document.getElementById('btn-edit-task').style.display = 'inline-block';
+                }
+
+                await loadTask();
+            } catch (err) {
+                document.getElementById('error-task').textContent = 'Gagal inisialisasi: ' + (err.message || '');
+                document.getElementById('error-task').style.display = 'block';
+            }
+        }
 
         async function loadTask() {
             try {
-                const res  = await TaskAPI.getOne(listId, taskId);
+                const res = await TaskAPI.getOne(listId, taskId);
                 const task = res.task || res.data || res;
-                currentTaskStatus = task.status || 'todo';
 
-                document.getElementById('task-name-input').value = task.title       || '';
-                document.getElementById('task-desc').value        = task.description || '';
+                document.getElementById('task-title').textContent = task.title || 'Untitled';
+                document.getElementById('task-desc').value = task.description || '';
+                
+                currentTaskStatus = task.status;
 
-                // Deadline
                 if (task.due_date) {
                     const d = new Date(task.due_date);
-                    document.getElementById('deadline-display').textContent =
-                        d.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+                    if (!isNaN(d.getTime())) {
+                        document.getElementById('task-deadline').textContent = d.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+                        document.getElementById('deadline-section').style.display = 'flex';
+                    }
                 } else {
-                    document.getElementById('deadline-display').textContent = '-';
+                    document.getElementById('deadline-section').style.display = 'none';
                 }
 
-                // Meta badges
+                // Render Meta (Status, Priority, Assignees)
                 const metaEl = document.getElementById('task-meta');
                 metaEl.innerHTML = '';
-                const priorityLabel = { high:'🔴 High', medium:'🟡 Medium', low:'🟢 Low' };
-                const statusLabel   = { todo:'📋 To Do', in_progress:'🔄 In Progress', done:'✅ Done' };
+
+                const priorityLabel = { high: 'High 🔴', medium: 'Medium', low: 'Low 🟢' };
+                const statusLabel   = { todo: 'To Do', in_progress: 'In Progress', done: 'Done' };
+
                 const pBadge = document.createElement('span');
                 pBadge.className   = `meta-item priority-${task.priority || 'medium'}`;
                 pBadge.textContent = priorityLabel[task.priority] || task.priority || 'Medium';
+                metaEl.appendChild(pBadge);
+
                 const sBadge = document.createElement('span');
                 sBadge.className   = `meta-item ${task.status === 'done' ? 'status-done' : task.status === 'in_progress' ? 'status-progress' : ''}`;
                 sBadge.textContent = statusLabel[task.status] || task.status || 'To Do';
-                metaEl.appendChild(pBadge);
                 metaEl.appendChild(sBadge);
+
+                if (task.assignees && task.assignees.length > 0) {
+                    task.assignees.forEach(a => {
+                        const aBadge = document.createElement('span');
+                        aBadge.className = 'assignee-badge';
+                        aBadge.textContent = a.username;
+                        metaEl.appendChild(aBadge);
+                    });
+                }
+
+                // Attachment
+                if (task.attachment) {
+                    document.getElementById('task-attachment').src = task.attachment;
+                    document.getElementById('attachment-section').style.display = 'block';
+                } else {
+                    document.getElementById('attachment-section').style.display = 'none';
+                }
 
                 // Done button
                 const btnDone = document.getElementById('btn-done');
@@ -287,7 +334,7 @@
             comments.forEach(c => {
                 const commentId  = c.id;
                 const isOwn      = currentUser && (c.user_id === currentUser.id || c.username === currentUser.username);
-                const dateStr    = c.created_at ? new Date(c.created_at).toLocaleDateString('id-ID') : '';
+                const dateStr    = c.created_at ? new Date(c.created_at).toLocaleDateString('id-ID', {hour:'2-digit', minute:'2-digit'}) : '';
 
                 const div = document.createElement('div');
                 div.className    = 'comment-item';
@@ -321,7 +368,6 @@
             document.getElementById(`comment-content-${commentId}`).style.display = 'none';
             document.getElementById(`comment-edit-${commentId}`).style.display     = 'block';
             document.getElementById(`comment-edit-row-${commentId}`).style.display = 'flex';
-            // Sembunyikan tombol edit/delete saat editing
             const actions = document.querySelector(`[data-id="${commentId}"] .comment-actions`);
             if (actions) actions.style.display = 'none';
         }
@@ -340,7 +386,6 @@
             if (!newContent) { alert('Komentar tidak boleh kosong.'); return; }
 
             try {
-                // PUT /api/lists/:listId/tasks/:taskId/comments/:commentId
                 await CommentAPI.update(listId, taskId, commentId, newContent);
                 await loadTask();
             } catch (err) { alert('Gagal mengedit komentar: ' + (err.message || '')); }
@@ -367,12 +412,11 @@
             } catch (err) { alert('Gagal mengirim komentar: ' + (err.message || '')); }
         }
 
-        // Enter = kirim komentar
         document.getElementById('comment-input').addEventListener('keydown', e => {
             if (e.key === 'Enter') submitComment();
         });
 
-        loadTask();
+        init();
     </script>
 </body>
 </html>

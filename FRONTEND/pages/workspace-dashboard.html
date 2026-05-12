@@ -133,6 +133,19 @@
                     imgEl.style.display = 'block';
                 }
 
+                // Cek role user saat ini
+                const currentUser = Auth.getUser();
+                let myRole = 'member';
+                if (currentUser && ws.members) {
+                    const me = ws.members.find(m => m.id === currentUser.id);
+                    if (me) myRole = me.role;
+                }
+
+                if (myRole === 'member') {
+                    document.getElementById('add-list-btn').style.display = 'none';
+                    document.getElementById('btn-edit-ws').style.display  = 'none';
+                }
+
                 // Load lists
                 const listRes  = await ListAPI.getAll(workspaceId);
                 const lists    = Array.isArray(listRes) ? listRes : (listRes.lists || []);
@@ -146,10 +159,6 @@
                 }
 
                 lists.forEach(list => {
-                    // Wrapper agar tombol edit tidak trigger navigasi
-                    const wrapper = document.createElement('div');
-                    wrapper.style.position = 'relative';
-
                     const a = document.createElement('a');
                     a.className = 'list-bar';
                     a.href      = `list-dashboard.html?workspaceId=${workspaceId}&listId=${list.id}`;
@@ -158,16 +167,19 @@
                     nameSpan.className   = 'list-bar-name';
                     nameSpan.textContent = list.name || 'Untitled List';
 
-                    const editBtn = document.createElement('button');
-                    editBtn.className   = 'btn-edit-list';
-                    editBtn.textContent = '✏️ Edit';
-                    editBtn.onclick     = function(e) {
-                        e.preventDefault(); e.stopPropagation();
-                        window.location.href = `list-setting.html?workspaceId=${workspaceId}&listId=${list.id}&mode=edit`;
-                    };
-
                     a.appendChild(nameSpan);
-                    a.appendChild(editBtn);
+
+                    if (myRole !== 'member') {
+                        const editBtn = document.createElement('button');
+                        editBtn.className   = 'btn-edit-list';
+                        editBtn.textContent = '✏️ Edit';
+                        editBtn.onclick     = function(e) {
+                            e.preventDefault(); e.stopPropagation();
+                            window.location.href = `list-setting.html?workspaceId=${workspaceId}&listId=${list.id}&mode=edit`;
+                        };
+                        a.appendChild(editBtn);
+                    }
+
                     container.appendChild(a);
                 });
 

@@ -130,10 +130,14 @@ const addMember = async (req, res) => {
             [req.params.workspaceId, newUser.id]
         );
 
+        // Get workspace name
+        const [wsRows] = await db.execute('SELECT name FROM workspaces WHERE id = ?', [req.params.workspaceId]);
+        const wsName = wsRows.length > 0 ? wsRows[0].name : 'a workspace';
+
         // Notify the new member
         await db.execute(
             'INSERT INTO notifications (user_id, title, message) VALUES (?, ?, ?)',
-            [newUser.id, 'Added to Workspace', `You have been added to workspace as a member.`]
+            [newUser.id, 'Added to Workspace', `Kamu telah ditambahkan ke workspace "${wsName}" oleh ${req.user.username}.`]
         );
 
         res.status(201).json({ success: true, message: `${newUser.username} added to workspace.` });

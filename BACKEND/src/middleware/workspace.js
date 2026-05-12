@@ -44,4 +44,41 @@ const isOwner = async (req, res, next) => {
     }
 };
 
-module.exports = { isMember, isOwner };
+// Check if user is owner or manager (must be used AFTER isMember)
+const requireManager = (req, res, next) => {
+    if (req.memberRole === 'owner' || req.memberRole === 'manager') {
+        next();
+    } else {
+        return res.status(403).json({ success: false, message: 'Access denied. Only managers or owners can do this.' });
+    }
+};
+
+// Check if user is owner or manager using listId
+const requireManagerForList = async (req, res, next) => {
+    const listId = req.params.listId || req.body.list_id;
+    const userId = req.user.id;
+
+    try {
+        const [rows] = await db.execute(
+            `SELECT wm.role 
+             FROM workspace_members wm
+             JOIN lists l ON l.workspace_id = wm.workspace_id
+             WHERE l.id = ? AND wm.user_id = ?`,
+            [listId, userId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(403).json({ success: false, message: 'Access denied. You are not a member.' });
+        }
+
+        if (rows[0].role === 'owner' || rows[0].role === 'manager') {
+            next();
+        } else {
+            return res.status(403).json({ success: false, message: 'Access denied. Only managers or owners can do this.' });
+        }
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Server error.' });
+    }
+};
+
+module.exports = { isMember, isOwner, requireManager, requireManagerForList };

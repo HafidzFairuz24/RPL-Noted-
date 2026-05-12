@@ -113,6 +113,23 @@
             }
 
             try {
+                // Cek role user saat ini via Workspace
+                const currentUser = Auth.getUser();
+                let myRole = 'member';
+                try {
+                    const wsRes = await WorkspaceAPI.getOne(workspaceId);
+                    const ws = wsRes.workspace || wsRes.data || wsRes;
+                    if (currentUser && ws.members) {
+                        const me = ws.members.find(m => m.id === currentUser.id);
+                        if (me) myRole = me.role;
+                    }
+                } catch (e) { console.error('Gagal cek role', e); }
+
+                if (myRole === 'member') {
+                    document.getElementById('add-task-btn').style.display = 'none';
+                    document.getElementById('btn-edit-list').style.display  = 'none';
+                }
+
                 // Load detail list
                 const listRes  = await ListAPI.getOne(workspaceId, listId);
                 const list     = listRes.list || listRes.data || listRes;
@@ -140,16 +157,19 @@
                     nameSpan.className   = 'task-bar-name';
                     nameSpan.textContent = task.title || 'Untitled Task';
 
-                    const editBtn = document.createElement('button');
-                    editBtn.className   = 'btn-edit-task-item';
-                    editBtn.textContent = '✏️ Edit';
-                    editBtn.onclick     = function(e) {
-                        e.preventDefault(); e.stopPropagation();
-                        window.location.href = `task-setting.html?workspaceId=${workspaceId}&listId=${listId}&taskId=${task.id}&mode=edit`;
-                    };
-
                     a.appendChild(nameSpan);
-                    a.appendChild(editBtn);
+
+                    if (myRole !== 'member') {
+                        const editBtn = document.createElement('button');
+                        editBtn.className   = 'btn-edit-task-item';
+                        editBtn.textContent = '✏️ Edit';
+                        editBtn.onclick     = function(e) {
+                            e.preventDefault(); e.stopPropagation();
+                            window.location.href = `task-setting.html?workspaceId=${workspaceId}&listId=${listId}&taskId=${task.id}&mode=edit`;
+                        };
+                        a.appendChild(editBtn);
+                    }
+
                     container.appendChild(a);
                 });
 
