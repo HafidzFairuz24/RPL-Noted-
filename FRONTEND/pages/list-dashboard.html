@@ -12,7 +12,6 @@
         .add-task-btn { background-color: var(--sidebar-red); width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; color: white; font-size: 2rem; border-radius: 8px; margin: 2rem auto; cursor: pointer; border: none; transition: transform 0.2s;}
         .add-task-btn:hover { transform: scale(1.1); }
 
-        /* Tambahan Style untuk tombol Back agar sesuai desain */
         .top-action-bar { 
             display: flex; 
             justify-content: flex-end; 
@@ -31,6 +30,10 @@
             transition: transform 0.2s; 
         }
         .btn-back-cream:hover { transform: scale(1.05); }
+        #loading-msg { font-family: var(--font-heading); color: var(--text-dark); opacity: 0.6; text-align: center; padding: 2rem; }
+        #error-list { color: #c0392b; font-family: var(--font-heading); padding: 1rem; display: none; }
+
+        .task-bar.done { text-decoration: line-through; opacity: 0.5; }
     </style>
 </head>
 <script src="../js/api.js"></script>
@@ -42,25 +45,87 @@
             <a href="profile.html" class="nav-btn">Profile</a>
             <a href="notification.html" class="nav-btn">Notification</a>
         </nav>
-        <div class="sidebar-footer"><a href="login.html" class="nav-btn">Log Out</a></div>
+        <div class="sidebar-footer"><a href="#" class="nav-btn" onclick="Auth.logout()">Log Out</a></div>
     </aside>
 
     <main class="main-content">
         <div class="top-action-bar">
-            <button class="btn-back-cream" onclick="window.location.href='workspace-dashboard.html'">Back</button>
+            <button class="btn-back-cream" id="back-btn">Back</button>
         </div>
 
         <div class="list-header-banner">
-            <h2>List 1</h2>
-            <p>Description subheading</p>
+            <h2 id="list-name">List</h2>
+            <p id="list-desc">Memuat deskripsi...</p>
         </div>
 
-        <a href="task-page.html" class="task-bar">Task 1</a>
-        <a href="task-page.html" class="task-bar">Task 2</a>
-        <a href="task-page.html" class="task-bar">Task 3</a>
-        <a href="task-page.html" class="task-bar">Task 4</a>
+        <p id="error-list"></p>
+        <p id="loading-msg">Memuat tasks...</p>
 
-        <button class="add-task-btn" onclick="window.location.href='task-setting.html'">+</button>
+        <div id="task-container"></div>
+
+        <button class="add-task-btn" id="add-task-btn">+</button>
     </main>
+
+    <script>
+        requireAuth();
+
+        const params      = new URLSearchParams(window.location.search);
+        const workspaceId = params.get('workspaceId');
+        const listId      = params.get('listId');
+
+        // Back ke workspace dashboard
+        document.getElementById('back-btn').onclick = function() {
+            window.location.href = `workspace-dashboard.html?workspaceId=${workspaceId}`;
+        };
+
+        // Tambah task
+        document.getElementById('add-task-btn').onclick = function() {
+            window.location.href = `task-setting.html?workspaceId=${workspaceId}&listId=${listId}`;
+        };
+
+        async function loadList() {
+            if (!workspaceId || !listId) {
+                document.getElementById('error-list').textContent = 'Parameter URL tidak lengkap.';
+                document.getElementById('error-list').style.display = 'block';
+                document.getElementById('loading-msg').style.display = 'none';
+                return;
+            }
+
+            try {
+                // Load detail list
+                const listRes  = await ListAPI.getOne(workspaceId, listId);
+                const list     = listRes.list || listRes.data || listRes;
+                document.getElementById('list-name').textContent = list.name  || list.title || 'List';
+                document.getElementById('list-desc').textContent = list.description || '';
+
+                // Load tasks
+                const taskRes  = await TaskAPI.getAll(listId);
+                const tasks    = Array.isArray(taskRes) ? taskRes : (taskRes.tasks || taskRes.data || []);
+                const container = document.getElementById('task-container');
+                document.getElementById('loading-msg').style.display = 'none';
+
+                if (tasks.length === 0) {
+                    document.getElementById('loading-msg').textContent = 'Belum ada task. Buat task pertama!';
+                    document.getElementById('loading-msg').style.display = 'block';
+                    return;
+                }
+
+                tasks.forEach(task => {
+                    const a = document.createElement('a');
+                    a.className   = 'task-bar' + (task.status === 'done' || task.isDone ? ' done' : '');
+                    a.textContent = task.title || task.name || 'Untitled Task';
+                    a.href        = `task-page.html?workspaceId=${workspaceId}&listId=${listId}&taskId=${task._id || task.id}`;
+                    container.appendChild(a);
+                });
+
+            } catch (err) {
+                document.getElementById('loading-msg').style.display = 'none';
+                document.getElementById('error-list').textContent = 'Gagal memuat data: ' + (err.message || 'Unknown error');
+                document.getElementById('error-list').style.display = 'block';
+            }
+        }
+
+        loadList();
+    </script>
 </body>
 </html>

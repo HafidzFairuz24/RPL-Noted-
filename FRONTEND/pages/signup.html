@@ -24,14 +24,15 @@
             <div class="auth-card">
                 <h2>Welcome!</h2>
                 <div class="form-group-wrapper">
-                    <form action="dashboard.html" method="GET">
-                        <div class="input-group"><label>Username</label><input type="text" required></div>
-                        <div class="input-group"><label>Email</label><input type="email" required></div>
-                        <div class="input-group"><label>Password</label><input type="password" required></div>
-                        <div class="input-group"><label>Confirm Password</label><input type="password" required></div>
+                    <form id="signup-form">
+                        <div class="input-group"><label for="reg-username">Username</label><input type="text" id="reg-username" required></div>
+                        <div class="input-group"><label for="reg-email">Email</label><input type="email" id="reg-email" required></div>
+                        <div class="input-group"><label for="reg-password">Password</label><input type="password" id="reg-password" required></div>
+                        <div class="input-group"><label for="reg-confirm">Confirm Password</label><input type="password" id="reg-confirm" required></div>
+                        <p id="error-msg" style="color:#ff6b6b; display:none; margin-top:0.5rem;"></p>
                     </form>
                 </div>
-                <button type="button" class="auth-btn" onclick="window.location.href='dashboard.html'">Sign In</button><br>
+                <button type="button" class="auth-btn" id="signup-btn" onclick="handleSignup()">Sign Up</button><br>
                 <a href="login.html" class="auth-link">Already have an account? Click here!</a>
             </div>
 
@@ -42,5 +43,54 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Jika sudah login, langsung ke dashboard
+        if (Auth.isLoggedIn()) {
+            window.location.href = 'dashboard.html';
+        }
+
+        async function handleSignup() {
+            const username = document.getElementById('reg-username').value.trim();
+            const email    = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value.trim();
+            const confirm  = document.getElementById('reg-confirm').value.trim();
+            const btn      = document.getElementById('signup-btn');
+            const errMsg   = document.getElementById('error-msg');
+
+            errMsg.style.display = 'none';
+
+            if (!username || !email || !password || !confirm) {
+                errMsg.textContent = 'Semua field wajib diisi.';
+                errMsg.style.display = 'block';
+                return;
+            }
+            if (password !== confirm) {
+                errMsg.textContent = 'Password dan Confirm Password tidak cocok.';
+                errMsg.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Loading...';
+
+            try {
+                const res = await AuthAPI.register({ username, email, password });
+                // Simpan token & user lalu masuk dashboard
+                Auth.setToken(res.token);
+                Auth.setUser(res.user);
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                errMsg.textContent = err.message || 'Registrasi gagal. Coba lagi.';
+                errMsg.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Sign Up';
+            }
+        }
+
+        document.getElementById('signup-form').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') handleSignup();
+        });
+    </script>
 </body>
 </html>

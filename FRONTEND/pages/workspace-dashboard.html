@@ -55,6 +55,8 @@
             cursor: pointer; 
             border: none; 
         }
+        #loading-msg { font-family: var(--font-heading); color: var(--text-dark); opacity: 0.6; text-align: center; padding: 2rem; }
+        #error-ws { color: #c0392b; font-family: var(--font-heading); padding: 1rem; display: none; }
     </style>
 </head>
 <script src="../js/api.js"></script>
@@ -67,22 +69,81 @@
             <a href="notification.html" class="nav-btn">Notification</a>
         </nav>
         <div class="sidebar-footer">
-            <a href="../index.html" class="nav-btn" style="display: block;">Log Out</a>
+            <a href="#" class="nav-btn" style="display: block;" onclick="Auth.logout()">Log Out</a>
         </div>
     </aside>
 
     <main class="main-content">
         <div class="workspace-header-banner">
-            <h2>Workspace 1</h2>
-            <p>Description subheading</p>
-            <span class="owned-by">Owned By : Username</span>
+            <h2 id="ws-name">Workspace</h2>
+            <p id="ws-desc">Memuat deskripsi...</p>
+            <span class="owned-by" id="ws-owner">Owned By: ...</span>
         </div>
 
-        <a href="list-dashboard.html" class="list-bar">List 1</a>
-        <a href="list-dashboard.html" class="list-bar">List 2</a>
-        <a href="list-dashboard.html" class="list-bar">List 3</a>
+        <p id="error-ws"></p>
+        <p id="loading-msg">Memuat lists...</p>
 
-        <button class="add-list-btn" onclick="window.location.href='list-setting.html'">+</button>
+        <div id="list-container"></div>
+
+        <button class="add-list-btn" id="add-list-btn">+</button>
     </main>
+
+    <script>
+        requireAuth();
+
+        // Ambil workspaceId dari URL
+        const params      = new URLSearchParams(window.location.search);
+        const workspaceId = params.get('workspaceId');
+
+        // Tombol tambah list → teruskan workspaceId
+        document.getElementById('add-list-btn').onclick = function() {
+            window.location.href = `list-setting.html?workspaceId=${workspaceId}`;
+        };
+
+        async function loadWorkspace() {
+            if (!workspaceId) {
+                document.getElementById('error-ws').textContent = 'workspaceId tidak ditemukan di URL.';
+                document.getElementById('error-ws').style.display = 'block';
+                document.getElementById('loading-msg').style.display = 'none';
+                return;
+            }
+
+            try {
+                // Load detail workspace
+                const wsRes = await WorkspaceAPI.getOne(workspaceId);
+                const ws = wsRes.workspace || wsRes.data || wsRes;
+                document.getElementById('ws-name').textContent  = ws.name  || ws.title || 'Workspace';
+                document.getElementById('ws-desc').textContent  = ws.description || '';
+                document.getElementById('ws-owner').textContent = `Owned By: ${ws.owner?.username || ws.owner?.name || 'Unknown'}`;
+
+                // Load lists
+                const listRes  = await ListAPI.getAll(workspaceId);
+                const lists    = Array.isArray(listRes) ? listRes : (listRes.lists || listRes.data || []);
+                const container = document.getElementById('list-container');
+                document.getElementById('loading-msg').style.display = 'none';
+
+                if (lists.length === 0) {
+                    document.getElementById('loading-msg').textContent = 'Belum ada list. Buat list pertama!';
+                    document.getElementById('loading-msg').style.display = 'block';
+                    return;
+                }
+
+                lists.forEach(list => {
+                    const a = document.createElement('a');
+                    a.className   = 'list-bar';
+                    a.textContent = list.name || list.title || 'Untitled List';
+                    a.href        = `list-dashboard.html?workspaceId=${workspaceId}&listId=${list._id || list.id}`;
+                    container.appendChild(a);
+                });
+
+            } catch (err) {
+                document.getElementById('loading-msg').style.display = 'none';
+                document.getElementById('error-ws').textContent = 'Gagal memuat data: ' + (err.message || 'Unknown error');
+                document.getElementById('error-ws').style.display = 'block';
+            }
+        }
+
+        loadWorkspace();
+    </script>
 </body>
 </html>

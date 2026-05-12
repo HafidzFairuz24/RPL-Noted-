@@ -5,7 +5,6 @@
     <title>Noted! - Task Detail</title>
     <link rel="stylesheet" href="../css/auth.css">
     <style>
-        /* Mengizinkan scroll jika konten panjang */
         body { overflow-y: auto; }
         
         .auth-container { 
@@ -81,7 +80,7 @@
         .attachment-section { font-family: var(--font-heading); font-size: 1.2rem; margin-bottom: 1.5rem; color: white; }
         .file-box { background: var(--card-gray); color: var(--text-dark); padding: 0.5rem; width: 300px; text-align: center; margin-top: 0.5rem; border-radius: 4px; }
         
-        .deadline-section { display: flex; align-items: center; gap: 1rem; font-family: var(--font-heading); font-size: 1.2rem; color: white; }
+        .deadline-section { display: flex; align-items: center; gap: 1rem; font-family: var(--font-heading); font-size: 1.2rem; color: white; margin-bottom: 1.5rem; }
         .calendar-btn { background: var(--card-gray); color: var(--text-dark); border: none; padding: 0.5rem 1rem; border-radius: 4px; font-family: var(--font-heading); }
         
         .btn-done { 
@@ -109,6 +108,44 @@
             margin: 0 auto; 
             padding-left: 2rem;
         }
+
+        /* Comment section */
+        .comment-section { max-width: 900px; width: 100%; margin: 0 auto; padding: 0 2rem; }
+        .comment-item { 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 8px; 
+            padding: 1rem 1.5rem; 
+            margin-bottom: 0.8rem; 
+            color: white;
+            font-family: var(--font-heading);
+        }
+        .comment-item .comment-author { font-size: 0.9rem; opacity: 0.7; margin-bottom: 0.3rem; }
+        .comment-item .comment-content { font-size: 1.1rem; }
+        .comment-form { display: flex; gap: 0.8rem; margin-top: 1rem; }
+        .comment-input { 
+            flex: 1; 
+            background: rgba(255,255,255,0.15); 
+            border: none; 
+            border-radius: 6px; 
+            padding: 0.8rem 1rem; 
+            color: white; 
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            outline: none;
+        }
+        .comment-input::placeholder { color: rgba(255,255,255,0.5); }
+        .btn-comment { 
+            background: var(--bg-cream); 
+            color: var(--text-dark); 
+            border: none; 
+            padding: 0.8rem 1.5rem; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-family: var(--font-heading);
+            transition: transform 0.2s;
+        }
+        .btn-comment:hover { transform: scale(1.05); }
+        #error-task { color: #ff6b6b; font-family: var(--font-heading); padding: 0.5rem; display: none; }
     </style>
 </head>
 <script src="../js/api.js"></script>
@@ -117,27 +154,131 @@
     <div class="auth-container">
         <div class="auth-card">
             <div class="task-header">
-                <input type="text" class="input-task-name" placeholder="Task Name">
-                <button class="btn-back" onclick="window.location.href='list-dashboard.html'">Back</button>
+                <input type="text" class="input-task-name" id="task-name-input" placeholder="Task Name">
+                <button class="btn-back" id="back-btn">Back</button>
             </div>
             
-            <textarea class="textarea-wide" placeholder="Task Description //(Max 1000 Characters)"></textarea>
+            <p id="error-task"></p>
+
+            <textarea class="textarea-wide" id="task-desc" placeholder="Task Description //(Max 1000 Characters)"></textarea>
             
             <div class="attachment-section">
                 <p>File Attachment //(Max 2):</p>
-                <div class="file-box">File 1</div>
-                <div class="file-box">File 2</div>
+                <div class="file-box" id="file-1">-</div>
+                <div class="file-box" id="file-2">-</div>
             </div>
 
             <div class="deadline-section">
                 <p>Deadline:</p>
-                <button class="calendar-btn">Calendar</button>
+                <button class="calendar-btn" id="deadline-display">-</button>
             </div>
 
-            <button class="btn-done" onclick="window.location.href='list-dashboard.html'">Mark as done</button>
+            <button class="btn-done" id="btn-done">Mark as done</button>
         </div>
         
         <h3 class="comment-text">Comment:</h3>
+
+        <div class="comment-section">
+            <div id="comment-list"></div>
+            <div class="comment-form">
+                <input type="text" class="comment-input" id="comment-input" placeholder="Tulis komentar...">
+                <button class="btn-comment" onclick="submitComment()">Kirim</button>
+            </div>
+        </div>
     </div>
+
+    <script>
+        requireAuth();
+
+        const params      = new URLSearchParams(window.location.search);
+        const workspaceId = params.get('workspaceId');
+        const listId      = params.get('listId');
+        const taskId      = params.get('taskId');
+
+        // Back button
+        document.getElementById('back-btn').onclick = function() {
+            window.location.href = `list-dashboard.html?workspaceId=${workspaceId}&listId=${listId}`;
+        };
+
+        async function loadTask() {
+            if (!listId || !taskId) {
+                showError('Parameter URL tidak lengkap.', 'error-task');
+                return;
+            }
+            try {
+                const res  = await TaskAPI.getOne(listId, taskId);
+                const task = res.task || res.data || res;
+
+                document.getElementById('task-name-input').value = task.title || task.name || '';
+                document.getElementById('task-desc').value        = task.description || task.content || '';
+
+                // Deadline
+                if (task.deadline || task.dueDate) {
+                    const d = new Date(task.deadline || task.dueDate);
+                    document.getElementById('deadline-display').textContent = d.toLocaleDateString('id-ID');
+                }
+
+                // Status
+                const btnDone = document.getElementById('btn-done');
+                if (task.status === 'done' || task.isDone) {
+                    btnDone.textContent = '✓ Done';
+                    btnDone.style.background = '#27ae60';
+                    btnDone.style.color = 'white';
+                }
+                btnDone.onclick = () => markDone(task.status === 'done' || task.isDone);
+
+                // Load comments
+                const comments = task.comments || [];
+                renderComments(comments);
+
+            } catch (err) {
+                showError('Gagal memuat task: ' + (err.message || 'Unknown error'), 'error-task');
+            }
+        }
+
+        function renderComments(comments) {
+            const list = document.getElementById('comment-list');
+            list.innerHTML = '';
+            if (comments.length === 0) {
+                list.innerHTML = '<p style="color:rgba(255,255,255,0.5); font-family:var(--font-heading);">Belum ada komentar.</p>';
+                return;
+            }
+            comments.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'comment-item';
+                div.innerHTML = `
+                    <div class="comment-author">${c.user?.username || c.author || 'User'}</div>
+                    <div class="comment-content">${c.content || c.text || ''}</div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        async function submitComment() {
+            const input   = document.getElementById('comment-input');
+            const content = input.value.trim();
+            if (!content) return;
+
+            try {
+                await CommentAPI.add(listId, taskId, content);
+                input.value = '';
+                // Reload task to get fresh comments
+                loadTask();
+            } catch (err) {
+                alert('Gagal mengirim komentar: ' + (err.message || 'Unknown error'));
+            }
+        }
+
+        async function markDone(currentlyDone) {
+            try {
+                await TaskAPI.update(listId, taskId, { status: currentlyDone ? 'pending' : 'done' });
+                loadTask();
+            } catch (err) {
+                alert('Gagal mengubah status: ' + (err.message || 'Unknown error'));
+            }
+        }
+
+        loadTask();
+    </script>
 </body>
 </html>

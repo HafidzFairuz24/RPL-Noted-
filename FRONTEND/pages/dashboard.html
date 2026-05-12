@@ -34,6 +34,7 @@
         color: var(--text-dark);
         text-decoration: none; 
         transition: transform 0.3s, background-color 0.3s; 
+        cursor: pointer;
     }
     
     .workspace-card:hover { 
@@ -62,6 +63,20 @@
     .add-workspace-btn:hover { 
         transform: scale(1.1); 
     }
+
+    #loading-msg { 
+        font-family: var(--font-heading); 
+        color: var(--text-dark); 
+        opacity: 0.6; 
+        text-align: center; 
+        padding: 2rem; 
+    }
+    #error-dashboard { 
+        color: #c0392b; 
+        font-family: var(--font-heading); 
+        padding: 1rem; 
+        display: none; 
+    }
 </style>
 </head>
 <script src="../js/api.js"></script>
@@ -74,23 +89,65 @@
             <a href="notification.html" class="nav-btn">Notification</a>
         </nav>
         <div class="sidebar-footer">
-            <a href="../index.html" class="nav-btn" style="display: block;">Log Out</a>
+            <a href="#" class="nav-btn" style="display: block;" onclick="Auth.logout()">Log Out</a>
         </div>
     </aside>
 
     <main class="main-content">
         <div class="header-banner">
-            <h2>Welcome, User.</h2>
+            <h2 id="welcome-text">Welcome, ...</h2>
         </div>
 
-        <div class="workspace-grid">
-                 <a href="workspace-dashboard.html" class="workspace-card">Workspace 1</a>
-                 <a href="workspace-dashboard.html" class="workspace-card">Workspace 2</a>
-                 <a href="workspace-dashboard.html" class="workspace-card">Workspace 3</a>
-                 <a href="workspace-dashboard.html" class="workspace-card">Workspace 4</a>
-                <a href="workspace-setting.html" class="add-workspace-btn">+</a>
-            </div>
-        </div>
+        <p id="error-dashboard"></p>
+        <p id="loading-msg">Memuat workspace...</p>
+
+        <div class="workspace-grid" id="workspace-grid"></div>
+
+        <a href="workspace-setting.html" class="add-workspace-btn">+</a>
     </main>
+
+    <script>
+        requireAuth();
+
+        // Tampilkan nama user
+        const user = Auth.getUser();
+        if (user) {
+            document.getElementById('welcome-text').textContent = `Welcome, ${user.username || user.name || 'User'}.`;
+        }
+
+        async function loadWorkspaces() {
+            const grid       = document.getElementById('workspace-grid');
+            const loadingMsg = document.getElementById('loading-msg');
+            const errEl      = document.getElementById('error-dashboard');
+
+            try {
+                const res = await WorkspaceAPI.getAll();
+                // Backend bisa mengembalikan array langsung atau { workspaces: [...] }
+                const workspaces = Array.isArray(res) ? res : (res.workspaces || res.data || []);
+                loadingMsg.style.display = 'none';
+
+                if (workspaces.length === 0) {
+                    loadingMsg.textContent = 'Belum ada workspace. Buat yang pertama!';
+                    loadingMsg.style.display = 'block';
+                    return;
+                }
+
+                workspaces.forEach(ws => {
+                    const card = document.createElement('a');
+                    card.className = 'workspace-card';
+                    card.textContent = ws.name || ws.title || 'Untitled';
+                    // Teruskan workspaceId via URL parameter
+                    card.href = `workspace-dashboard.html?workspaceId=${ws._id || ws.id}`;
+                    grid.appendChild(card);
+                });
+            } catch (err) {
+                loadingMsg.style.display = 'none';
+                errEl.textContent = 'Gagal memuat workspace: ' + (err.message || 'Unknown error');
+                errEl.style.display = 'block';
+            }
+        }
+
+        loadWorkspaces();
+    </script>
 </body>
 </html>

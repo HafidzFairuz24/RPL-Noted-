@@ -15,7 +15,7 @@
             <h2>Welcome Back!</h2>
             
             <div class="form-group-wrapper">
-                <form action="dashboard.html" method="GET">
+                <form id="login-form">
                     <div class="input-group">
                         <label for="username">Username</label>
                         <input type="text" id="username" name="username" required>
@@ -24,13 +24,57 @@
                         <label for="password">Password</label>
                         <input type="password" id="password" name="password" required>
                     </div>
+                    <p id="error-msg" style="color:#ff6b6b; display:none; margin-top:0.5rem;"></p>
                 </form>
             </div>
 
-            <button type="button" class="auth-btn" onclick="window.location.href='dashboard.html'">Log In</button>
+            <button type="button" class="auth-btn" id="login-btn" onclick="handleLogin()">Log In</button>
             <br>
             <a href="signup.html" class="auth-link">Doesn't have an account yet? Click here.</a>
         </div>
     </div>
+
+    <script>
+        // Jika sudah login, langsung ke dashboard
+        if (Auth.isLoggedIn()) {
+            window.location.href = 'dashboard.html';
+        }
+
+        async function handleLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const btn      = document.getElementById('login-btn');
+            const errMsg   = document.getElementById('error-msg');
+
+            errMsg.style.display = 'none';
+
+            if (!username || !password) {
+                errMsg.textContent = 'Username dan password wajib diisi.';
+                errMsg.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Loading...';
+
+            try {
+                const res = await AuthAPI.login({ username, password });
+                // Simpan token & user ke localStorage
+                Auth.setToken(res.token);
+                Auth.setUser(res.user);
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                errMsg.textContent = err.message || 'Login gagal. Periksa username dan password.';
+                errMsg.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Log In';
+            }
+        }
+
+        // Submit dengan Enter
+        document.getElementById('login-form').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') handleLogin();
+        });
+    </script>
 </body>
 </html>
