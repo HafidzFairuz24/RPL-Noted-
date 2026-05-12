@@ -95,7 +95,7 @@ const login = async (req, res) => {
 const getMe = async (req, res) => {
     try {
         const [rows] = await db.execute(
-            'SELECT id, username, email, created_at FROM users WHERE id = ?',
+            'SELECT id, username, email, profile_picture, created_at FROM users WHERE id = ?',
             [req.user.id]
         );
 
@@ -111,11 +111,11 @@ const getMe = async (req, res) => {
 
 // ── PUT /api/auth/profile ─────────────────────────────────────────────────────
 const updateProfile = async (req, res) => {
-    const { username, email } = req.body;
+    const { username, email, profile_picture } = req.body;
     const userId = req.user.id;
 
-    if (!username && !email) {
-        return res.status(400).json({ success: false, message: 'Provide at least username or email to update.' });
+    if (!username && !email && profile_picture === undefined) {
+        return res.status(400).json({ success: false, message: 'Provide at least username, email, or profile_picture to update.' });
     }
 
     try {
@@ -125,9 +125,12 @@ const updateProfile = async (req, res) => {
         if (email) {
             await db.execute('UPDATE users SET email = ? WHERE id = ?', [email, userId]);
         }
+        if (profile_picture !== undefined) {
+            await db.execute('UPDATE users SET profile_picture = ? WHERE id = ?', [profile_picture, userId]);
+        }
 
         const [rows] = await db.execute(
-            'SELECT id, username, email, created_at FROM users WHERE id = ?',
+            'SELECT id, username, email, profile_picture, created_at FROM users WHERE id = ?',
             [userId]
         );
         res.json({ success: true, message: 'Profile updated.', user: rows[0] });
@@ -140,7 +143,7 @@ const updateProfile = async (req, res) => {
 const getUser = async (req, res) => {
     try {
         const [rows] = await db.execute(
-            'SELECT id, username, email, created_at FROM users WHERE id = ?',
+            'SELECT id, username, email, profile_picture, created_at FROM users WHERE id = ?',
             [req.params.userId]
         );
 

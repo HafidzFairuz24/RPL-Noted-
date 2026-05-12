@@ -56,7 +56,8 @@ const getTask = async (req, res) => {
                     u1.username AS created_by_name,
                     ta.user_id AS assignee_id,
                     u2.username AS assignee_name,
-                    u2.email AS assignee_email
+                    u2.email AS assignee_email,
+                    u2.profile_picture AS assignee_profile_picture
              FROM tasks t
              JOIN users u1 ON u1.id = t.created_by
              LEFT JOIN task_assignees ta ON ta.task_id = t.id
@@ -70,6 +71,7 @@ const getTask = async (req, res) => {
         delete taskData.assignee_id;
         delete taskData.assignee_name;
         delete taskData.assignee_email;
+        delete taskData.assignee_profile_picture;
 
         for (const r of rows) {
             if (r.assignee_id) {
@@ -77,7 +79,8 @@ const getTask = async (req, res) => {
                     taskData.assignees.push({
                         id: r.assignee_id,
                         username: r.assignee_name,
-                        email: r.assignee_email
+                        email: r.assignee_email,
+                        profile_picture: r.assignee_profile_picture
                     });
                 }
             }
@@ -85,7 +88,7 @@ const getTask = async (req, res) => {
 
         // Get comments
         const [comments] = await db.execute(
-            `SELECT c.*, u.username
+            `SELECT c.*, u.username, u.profile_picture
              FROM comments c
              JOIN users u ON u.id = c.user_id
              WHERE c.task_id = ?

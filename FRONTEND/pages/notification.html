@@ -36,14 +36,15 @@
         }
 
         .notif-item.active { 
-            opacity: 1; 
-            background-color: var(--bg-cream);
+            opacity: 0.8; 
+            background-color: #e0e0e0;
         }
 
         .notif-item.unread {
             opacity: 1;
             background-color: var(--bg-cream);
             border-left: 4px solid var(--primary-red);
+            font-weight: bold;
         }
 
         .notif-item h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
@@ -116,32 +117,27 @@
                 }
 
                 notifs.forEach(notif => {
-                    const isUnread = !notif.isRead && notif.isRead !== undefined
-                                     ? true
-                                     : (notif.read === false);
+                    const isUnread = notif.is_read === 0;
 
                     const item = document.createElement('div');
                     item.className = 'notif-item' + (isUnread ? ' unread' : ' active');
-                    item.dataset.id = notif._id || notif.id;
+                    item.dataset.id = notif.id;
 
                     // Tanggal
                     let dateStr = '';
-                    if (notif.createdAt) {
-                        const d = new Date(notif.createdAt);
-                        dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                    if (notif.created_at) {
+                        const d = new Date(notif.created_at);
+                        dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
                     }
 
                     item.innerHTML = `
-                        <div class="notif-info">
-                            <h3>${notif.title || notif.heading || 'Notifikasi'}</h3>
-                            <p>${notif.message || notif.body || notif.description || ''}</p>
+                        <div class="notif-info" onclick="markRead(${notif.id}, this)" style="cursor: pointer; width: 100%;">
+                            <h3>${notif.title || 'Notifikasi'}</h3>
+                            <p>${notif.message || ''}</p>
                             ${dateStr ? `<p class="notif-date">${dateStr}</p>` : ''}
                         </div>
-                        <button class="notif-delete-btn" title="Hapus" onclick="deleteNotif('${notif._id || notif.id}', this)">✕</button>
+                        <button class="notif-delete-btn" title="Hapus" onclick="deleteNotif('${notif.id}', this)">✕</button>
                     `;
-
-                    // Klik item = tandai dibaca
-                    item.querySelector('.notif-info').onclick = () => markRead(notif._id || notif.id, item);
 
                     container.appendChild(item);
                 });
@@ -156,8 +152,16 @@
         async function markRead(id, el) {
             try {
                 await NotificationAPI.markRead(id);
-                el.classList.remove('unread');
-                el.classList.add('active');
+                const item = el.closest ? el.closest('.notif-item') : el;
+                if (item) {
+                    item.classList.remove('unread');
+                    item.classList.add('active');
+                }
+                
+                // Kurangi badge notif jika ada fungsi checkUnreadNotifications
+                if (typeof checkUnreadNotifications === 'function') {
+                    checkUnreadNotifications();
+                }
             } catch (_) { /* silent */ }
         }
 

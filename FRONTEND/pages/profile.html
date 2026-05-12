@@ -172,10 +172,29 @@
             }
 
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 const base64 = e.target.result;
-                localStorage.setItem(AVATAR_KEY, base64);
-                renderAvatar(base64);
+                
+                try {
+                    // Tampilkan indikator loading di tombol atau gambar
+                    document.getElementById('profile-avatar').innerHTML = '<span style="font-size:12px;">Uploading...</span>';
+                    
+                    const res = await AuthAPI.updateProfile({ profile_picture: base64 });
+                    const user = res.user || res.data || res;
+                    
+                    // Simpan di local storage sebagai cache
+                    localStorage.setItem(AVATAR_KEY, base64);
+                    Auth.setUser(user);
+                    
+                    renderAvatar(base64);
+                    showSuccess('Foto profil berhasil diunggah!');
+                } catch (err) {
+                    alert('Gagal mengunggah foto: ' + (err.message || 'Server error'));
+                    // Revert to old avatar
+                    const oldAvatar = localStorage.getItem(AVATAR_KEY);
+                    if (oldAvatar) renderAvatar(oldAvatar);
+                    else renderAvatar('?');
+                }
             };
             reader.readAsDataURL(file);
         }
@@ -309,14 +328,19 @@
                 document.getElementById('profile-created-at').textContent = 'Tidak diketahui';
             }
 
-            // Avatar: cek localStorage jika isMyProfile, jika tidak gunakan ui-avatars
-            let savedAvatar = null;
-            if (isMyProfile) {
-                savedAvatar = localStorage.getItem(AVATAR_KEY);
+            // Avatar: prioritas dari backend, lalu localStorage (jika my profile), lalu ui-avatars
+            let finalAvatar = user.profile_picture;
+            
+            if (!finalAvatar && isMyProfile) {
+                finalAvatar = localStorage.getItem(AVATAR_KEY);
             }
             
-            if (savedAvatar) {
-                renderAvatar(savedAvatar);
+            if (finalAvatar) {
+                renderAvatar(finalAvatar);
+                if (isMyProfile && user.profile_picture) {
+                    // Update localStorage untuk konsistensi
+                    localStorage.setItem(AVATAR_KEY, user.profile_picture);
+                }
             } else {
                 const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=random`;
                 renderAvatar(avatarUrl);

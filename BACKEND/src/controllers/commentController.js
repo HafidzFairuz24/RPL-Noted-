@@ -13,7 +13,7 @@ const addComment = async (req, res) => {
         );
 
         const [rows] = await db.execute(
-            `SELECT c.*, u.username FROM comments c JOIN users u ON u.id = c.user_id WHERE c.id = ?`,
+            `SELECT c.*, u.username, u.profile_picture FROM comments c JOIN users u ON u.id = c.user_id WHERE c.id = ?`,
             [result.insertId]
         );
 

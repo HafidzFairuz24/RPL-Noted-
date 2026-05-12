@@ -27,7 +27,21 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ── DB (init connection pool) ─────────────────────────────────────────────────
-require('./config/db');
+const db = require('./config/db');
+
+// Auto-migration
+(async () => {
+    try {
+        await db.execute('ALTER TABLE users ADD COLUMN profile_picture MEDIUMTEXT');
+        console.log('Database migrated: added profile_picture to users table.');
+    } catch (err) {
+        if (err.code === 'ER_DUP_FIELDNAME') {
+            console.log('Database migrated: profile_picture already exists.');
+        } else {
+            console.error('Database migration failed:', err.message);
+        }
+    }
+})();
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 const authRoutes         = require('./routes/auth');

@@ -31,7 +31,7 @@ const getWorkspace = async (req, res) => {
         if (rows.length === 0) return res.status(404).json({ success: false, message: 'Workspace not found.' });
 
         const [members] = await db.execute(
-            `SELECT u.id, u.username, u.email, wm.role, wm.joined_at
+            `SELECT u.id, u.username, u.email, u.profile_picture, wm.role, wm.joined_at
              FROM workspace_members wm
              JOIN users u ON u.id = wm.user_id
              WHERE wm.workspace_id = ?`,

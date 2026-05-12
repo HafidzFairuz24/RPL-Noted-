@@ -90,6 +90,26 @@ const NotificationAPI = {
 function requireAuth() {
     if (!Auth.isLoggedIn()) {
         window.location.href = 'login.html';
+    } else {
+        // Cek notifikasi belum dibaca jika sudah login
+        checkUnreadNotifications();
+    }
+}
+
+async function checkUnreadNotifications() {
+    try {
+        const res = await NotificationAPI.getAll();
+        const unreadCount = res.unreadCount || 0;
+        const badge = document.getElementById('notif-badge');
+        if (badge) {
+            if (unreadCount > 0) {
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+    } catch (err) {
+        console.error("Gagal mengecek notifikasi:", err);
     }
 }
 

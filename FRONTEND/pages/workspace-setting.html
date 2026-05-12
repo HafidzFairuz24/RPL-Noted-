@@ -305,7 +305,7 @@
                 
                 const isMe = currentUser && currentUser.id === m.id;
                 const isOwner = m.role === 'owner';
-                const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(m.username || 'User')}&background=random`;
+                const avatarUrl = m.profile_picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.username || 'User')}&background=random`;
 
                 let badgeHtml = '';
                 if (m.role === 'owner') badgeHtml = `<span class="role-badge">Owner</span>`;

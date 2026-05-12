@@ -89,7 +89,7 @@
             </div>
             <a href="dashboard.html" class="nav-btn active">Main Dashboard</a>
             <a href="profile.html" class="nav-btn">Profile</a>
-            <a href="notification.html" class="nav-btn">Notification</a>
+            <a href="notification.html" class="nav-btn" id="nav-notification">Notification <span id="notif-badge" style="display:none; width:10px; height:10px; background:red; border-radius:50%; display:inline-block; margin-left:5px;"></span></a>
         </nav>
         <div class="sidebar-footer">
             <a href="#" class="nav-btn" style="display: block;" onclick="Auth.logout()">Log Out</a>
@@ -117,11 +117,14 @@
         if (user) {
             document.getElementById('welcome-text').textContent = `Welcome, ${user.username || user.name || 'User'}.`;
             
-            const savedAvatar = localStorage.getItem('noted_avatar');
             const avatarEl = document.getElementById('sidebar-avatar');
-            if (savedAvatar) {
-                avatarEl.src = savedAvatar;
+            // Gunakan profile_picture dari DB, fallback ke localStorage, fallback ke ui-avatars
+            const finalAvatar = user.profile_picture || localStorage.getItem('noted_avatar');
+            
+            if (finalAvatar) {
+                avatarEl.src = finalAvatar;
                 avatarEl.style.display = 'block';
+                if (user.profile_picture) localStorage.setItem('noted_avatar', user.profile_picture);
             } else {
                 avatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username || 'User')}&background=random`;
                 avatarEl.style.display = 'block';
