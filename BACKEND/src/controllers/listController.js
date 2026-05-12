@@ -1,5 +1,7 @@
 const db = require('../config/db');
 
+const { notifyWorkspaceMembers } = require('../utils/notify');
+
 // ── GET /api/workspaces/:workspaceId/lists ────────────────────────────────────
 const getLists = async (req, res) => {
     try {
@@ -48,6 +50,18 @@ const createList = async (req, res) => {
             'INSERT INTO lists (workspace_id, name, description, created_by) VALUES (?, ?, ?, ?)',
             [req.params.workspaceId, name, description || null, req.user.id]
         );
+        
+        // Notifikasi ke workspace
+        const [wsRows] = await db.execute('SELECT name FROM workspaces WHERE id = ?', [req.params.workspaceId]);
+        if (wsRows.length > 0) {
+            await notifyWorkspaceMembers(
+                req.params.workspaceId,
+                req.user.id,
+                'List Baru',
+                `${req.user.username} membuat list baru "${name}" di workspace "${wsRows[0].name}".`
+            );
+        }
+
         res.status(201).json({ success: true, message: 'List created.', listId: result.insertId });
     } catch (err) {
         res.status(500).json({ success: false, message: 'Server error.' });

@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { notifyWorkspaceMembers } = require('../utils/notify');
 
 // ── POST /api/tasks/:taskId/comments ─────────────────────────────────────────
 const addComment = async (req, res) => {
@@ -15,6 +16,20 @@ const addComment = async (req, res) => {
             `SELECT c.*, u.username FROM comments c JOIN users u ON u.id = c.user_id WHERE c.id = ?`,
             [result.insertId]
         );
+
+        // Notify workspace members
+        const [taskRows] = await db.execute(
+            `SELECT t.title, l.workspace_id FROM tasks t JOIN lists l ON l.id = t.list_id WHERE t.id = ?`,
+            [req.params.taskId]
+        );
+        if (taskRows.length > 0) {
+            await notifyWorkspaceMembers(
+                taskRows[0].workspace_id,
+                req.user.id,
+                'Komentar Baru',
+                `${req.user.username} menambahkan komentar pada task "${taskRows[0].title}".`
+            );
+        }
 
         res.status(201).json({ success: true, message: 'Comment added.', comment: rows[0] });
     } catch (err) {

@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { notifyWorkspaceMembers } = require('../utils/notify');
 
 // ── GET /api/lists/:listId/tasks ──────────────────────────────────────────────
 const getTasks = async (req, res) => {
@@ -143,6 +144,17 @@ const createTask = async (req, res) => {
             }
         }
 
+        // Notify workspace members about new task
+        const [listRows] = await conn.execute('SELECT workspace_id, name FROM lists WHERE id = ?', [req.params.listId]);
+        if (listRows.length > 0) {
+            const wsId = listRows[0].workspace_id;
+            const listName = listRows[0].name;
+            await notifyWorkspaceMembers(
+                wsId, req.user.id, 'Task Baru',
+                `${req.user.username} membuat task baru "${title}" di list "${listName}".`
+            );
+        }
+
         await conn.commit();
         res.status(201).json({ success: true, message: 'Task created.', taskId });
     } catch (err) {
@@ -160,6 +172,13 @@ const updateTask = async (req, res) => {
     
     try {
         await conn.beginTransaction();
+
+        // Check old task data to see what changed
+        const [oldRows] = await conn.execute(
+            'SELECT title, due_date, attachment, list_id FROM tasks WHERE id = ?',
+            [req.params.taskId]
+        );
+        const oldTask = oldRows.length > 0 ? oldRows[0] : null;
 
         const fields = [];
         const values = [];
@@ -183,6 +202,30 @@ const updateTask = async (req, res) => {
             await conn.execute('DELETE FROM task_assignees WHERE task_id = ?', [req.params.taskId]);
             for (const userId of assignees) {
                 await conn.execute('INSERT IGNORE INTO task_assignees (task_id, user_id) VALUES (?, ?)', [req.params.taskId, userId]);
+            }
+        }
+
+        // Notifications
+        if (oldTask) {
+            const [listRows] = await conn.execute('SELECT workspace_id, name FROM lists WHERE id = ?', [oldTask.list_id]);
+            if (listRows.length > 0) {
+                const wsId = listRows[0].workspace_id;
+                
+                // Deadline changed
+                if (due_date !== undefined && due_date !== oldTask.due_date) {
+                    await notifyWorkspaceMembers(
+                        wsId, req.user.id, 'Update Deadline',
+                        `${req.user.username} mengubah deadline task "${oldTask.title}".`
+                    );
+                }
+                
+                // Attachment changed
+                if (attachment !== undefined && attachment !== oldTask.attachment && attachment !== null && attachment !== '') {
+                    await notifyWorkspaceMembers(
+                        wsId, req.user.id, 'Update Lampiran',
+                        `${req.user.username} menambahkan/mengubah lampiran pada task "${oldTask.title}".`
+                    );
+                }
             }
         }
 

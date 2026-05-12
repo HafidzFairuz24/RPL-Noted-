@@ -70,7 +70,12 @@
             display: flex; justify-content: space-between; align-items: center;
             background: white; padding: 0.5rem 1rem; border-radius: 4px; gap: 1rem;
         }
+        .member-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
         .member-info { flex: 1; font-size: 1rem; display: flex; flex-direction: column; }
+        .member-name-row { display: flex; align-items: center; gap: 0.5rem; }
+        .member-name { text-decoration: none; color: var(--text-dark); font-weight: bold; }
+        .member-name:hover { text-decoration: underline; }
+        .role-badge { font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 12px; background: rgba(0,0,0,0.1); color: var(--text-dark); }
         .member-email { font-size: 0.85rem; opacity: 0.7; }
         .role-select {
             padding: 0.3rem; border-radius: 4px; font-family: var(--font-heading);
@@ -300,6 +305,12 @@
                 
                 const isMe = currentUser && currentUser.id === m.id;
                 const isOwner = m.role === 'owner';
+                const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(m.username || 'User')}&background=random`;
+
+                let badgeHtml = '';
+                if (m.role === 'owner') badgeHtml = `<span class="role-badge">Owner</span>`;
+                else if (m.role === 'manager') badgeHtml = `<span class="role-badge">Project Manager</span>`;
+                else badgeHtml = `<span class="role-badge">Member</span>`;
 
                 // Dropdown role (Owner tidak bisa diubah rolenya lewat UI sini, dan kita gak bisa ubah role diri sendiri di sini)
                 let roleSelectHtml = '';
@@ -311,8 +322,6 @@
                             <option value="manager" ${isManager ? 'selected' : ''}>Project Manager</option>
                         </select>
                     `;
-                } else if (isOwner) {
-                    roleSelectHtml = `<span style="font-size:0.85rem; opacity:0.7;">Owner</span>`;
                 }
 
                 // Tombol hapus
@@ -322,8 +331,12 @@
                 }
 
                 row.innerHTML = `
+                    <img src="${avatarUrl}" class="member-avatar" alt="Avatar">
                     <div class="member-info">
-                        <span class="member-name">${m.username || 'User'}</span>
+                        <div class="member-name-row">
+                            <a href="profile.html?userId=${m.id}" class="member-name">${m.username || 'User'}</a>
+                            ${badgeHtml}
+                        </div>
                         <span class="member-email">${m.email}</span>
                     </div>
                     ${roleSelectHtml}

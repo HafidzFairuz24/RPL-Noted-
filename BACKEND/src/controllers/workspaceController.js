@@ -186,6 +186,17 @@ const updateMemberRole = async (req, res) => {
         if (result.affectedRows === 0) {
             return res.status(404).json({ success: false, message: 'Member not found.' });
         }
+
+        // Dapatkan nama workspace untuk notifikasi
+        const [wsRows] = await db.execute('SELECT name FROM workspaces WHERE id = ?', [req.params.workspaceId]);
+        if (wsRows.length > 0) {
+            const roleName = role === 'manager' ? 'Project Manager' : role === 'owner' ? 'Owner' : 'Member';
+            await db.execute(
+                'INSERT INTO notifications (user_id, title, message) VALUES (?, ?, ?)',
+                [userId, 'Perubahan Role', `Role kamu di workspace "${wsRows[0].name}" telah diubah menjadi ${roleName} oleh ${req.user.username}.`]
+            );
+        }
+
         res.json({ success: true, message: 'Member role updated.' });
     } catch (err) {
         res.status(500).json({ success: false, message: 'Server error.' });
