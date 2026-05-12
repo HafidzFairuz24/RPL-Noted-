@@ -135,9 +135,9 @@
                 workspaces.forEach(ws => {
                     const card = document.createElement('a');
                     card.className = 'workspace-card';
-                    card.textContent = ws.name || ws.title || 'Untitled';
-                    // Teruskan workspaceId via URL parameter
-                    card.href = `workspace-dashboard.html?workspaceId=${ws._id || ws.id}`;
+                    card.textContent = ws.name || 'Untitled';
+                    // Backend MySQL: id adalah integer
+                    card.href = `workspace-dashboard.html?workspaceId=${ws.id}`;
                     grid.appendChild(card);
                 });
             } catch (err) {

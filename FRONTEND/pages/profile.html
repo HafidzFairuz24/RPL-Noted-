@@ -5,10 +5,77 @@
     <title>Noted! - Profile</title>
     <link rel="stylesheet" href="../css/dashboard.css">
     <style>
-        .profile-header { display: flex; gap: 2rem; align-items: center; margin-bottom: 2rem; }
-        .profile-pic { width: 150px; height: 150px; border-radius: 50%; background-color: var(--card-gray); display: flex; justify-content: center; align-items: center; font-size: 2rem; color: var(--text-dark); font-family: var(--font-heading); }
-        .username-box { background-color: var(--sidebar-red); color: white; flex-grow: 1; padding: 2rem; border-radius: 8px; font-size: 2.5rem; font-family: var(--font-heading); }
-        .info-box { background-color: var(--bg-cream); color: var(--text-dark); padding: 1rem 2rem; border-radius: 8px; margin-bottom: 1rem; font-family: var(--font-heading); font-size: 1.2rem; }
+        .profile-header { display: flex; gap: 2rem; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; }
+
+        /* Avatar */
+        .avatar-wrapper {
+            position: relative; width: 150px; height: 150px; flex-shrink: 0; cursor: pointer;
+        }
+        .profile-pic {
+            width: 150px; height: 150px; border-radius: 50%;
+            background-color: var(--sidebar-red);
+            display: flex; justify-content: center; align-items: center;
+            font-size: 3.5rem; color: white; font-family: var(--font-heading);
+            overflow: hidden; user-select: none;
+        }
+        .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar-overlay {
+            position: absolute; bottom: 0; left: 0; right: 0; height: 45px;
+            background: rgba(0,0,0,0.55); border-radius: 0 0 50% 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 0.8rem; font-family: var(--font-heading);
+            opacity: 0; transition: opacity 0.2s; cursor: pointer;
+        }
+        .avatar-wrapper:hover .avatar-overlay { opacity: 1; }
+        #avatar-input { display: none; }
+
+        /* Username box */
+        .username-box {
+            background-color: var(--sidebar-red); color: white; flex-grow: 1;
+            padding: 1.5rem 2rem; border-radius: 8px;
+            font-family: var(--font-heading);
+        }
+        .username-display { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .username-edit-row { display: flex; gap: 0.7rem; align-items: center; flex-wrap: wrap; }
+        .input-username {
+            background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
+            color: white; padding: 0.5rem 1rem; border-radius: 6px;
+            font-family: var(--font-heading); font-size: 1rem; outline: none; flex: 1; min-width: 160px;
+        }
+        .input-username::placeholder { color: rgba(255,255,255,0.6); }
+        .btn-save-username {
+            background: white; color: var(--sidebar-red); border: none;
+            padding: 0.5rem 1.2rem; border-radius: 6px;
+            font-family: var(--font-heading); font-size: 0.95rem; cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-save-username:hover { opacity: 0.85; }
+        .btn-save-username:disabled { opacity: 0.4; cursor: not-allowed; }
+        .cooldown-msg { font-size: 0.85rem; opacity: 0.85; margin-top: 0.4rem; }
+
+        /* Info boxes */
+        .info-box {
+            background-color: var(--bg-cream); color: var(--text-dark);
+            padding: 1rem 2rem; border-radius: 8px; margin-bottom: 1rem;
+            font-family: var(--font-heading); font-size: 1.2rem;
+            display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+        }
+        .info-label { min-width: 180px; opacity: 0.7; flex-shrink: 0; }
+        .info-value { flex: 1; font-weight: bold; word-break: break-all; }
+        .btn-toggle-pw {
+            background: var(--card-gray); color: var(--text-dark); border: none;
+            padding: 0.3rem 0.9rem; border-radius: 4px; cursor: pointer;
+            font-family: var(--font-heading); font-size: 0.9rem; transition: background 0.2s;
+        }
+        .btn-toggle-pw:hover { background: #b0b0b0; }
+        .date-badge {
+            background: #ccc; color: var(--text-dark);
+            padding: 0.2rem 1rem; border-radius: 4px; font-size: 1rem;
+        }
+
+        .page-title { color: var(--primary-red); font-family: var(--font-heading); font-size: 2.5rem; margin-bottom: 1.5rem; }
+        #error-profile { color: #c0392b; font-family: var(--font-heading); padding: 0.5rem; display: none; }
+        #success-profile { color: #27ae60; font-family: var(--font-heading); padding: 0.5rem; display: none; }
     </style>
 </head>
 <script src="../js/api.js"></script>
@@ -20,23 +87,224 @@
             <a href="profile.html" class="nav-btn active">Profile</a>
             <a href="notification.html" class="nav-btn">Notification</a>
         </nav>
-        <div class="sidebar-footer"><a href="login.html" class="nav-btn">Log Out</a></div>
+        <div class="sidebar-footer"><a href="#" class="nav-btn" onclick="Auth.logout()">Log Out</a></div>
     </aside>
 
     <main class="main-content">
         <h2 class="page-title">Profile.</h2>
-        <button class="back-btn">Back</button>
+        <p id="error-profile"></p>
+        <p id="success-profile"></p>
 
+        <!-- Avatar + Username -->
         <div class="profile-header">
-            <div class="profile-pic">Pic</div>
-            <div class="username-box">Username</div>
+            <!-- Avatar dengan overlay klik untuk ganti -->
+            <div class="avatar-wrapper" onclick="document.getElementById('avatar-input').click()">
+                <div class="profile-pic" id="profile-avatar">?</div>
+                <div class="avatar-overlay">📷 Ganti Foto</div>
+            </div>
+            <input type="file" id="avatar-input" accept="image/*" onchange="handleAvatarChange(event)">
+
+            <!-- Username box -->
+            <div class="username-box">
+                <div class="username-display" id="username-display">Memuat...</div>
+                <div class="username-edit-row">
+                    <input type="text" class="input-username" id="input-new-username" placeholder="Username baru...">
+                    <button class="btn-save-username" id="btn-save-username" onclick="saveUsername()">Simpan</button>
+                </div>
+                <p class="cooldown-msg" id="cooldown-msg"></p>
+            </div>
         </div>
 
-        <div class="info-box">Email : Email</div>
-        <div class="info-box">Password : xxxx</div>
-        <div class="info-box" style="display: flex; gap: 1rem; align-items: center;">
-            Account Created At : <span style="background: #ccc; color: var(--text-dark); padding: 0.2rem 1rem; border-radius: 4px;">Date</span>
+        <!-- Email -->
+        <div class="info-box">
+            <span class="info-label">Email :</span>
+            <span class="info-value" id="profile-email">-</span>
+        </div>
+
+        <!-- Password -->
+        <div class="info-box">
+            <span class="info-label">Password :</span>
+            <span class="info-value" id="profile-password">••••••••</span>
+            <button class="btn-toggle-pw" id="toggle-pw-btn" onclick="togglePassword()">👁 Lihat</button>
+        </div>
+
+        <!-- Created At -->
+        <div class="info-box">
+            <span class="info-label">Account Created At :</span>
+            <span class="date-badge" id="profile-created-at">-</span>
         </div>
     </main>
+
+    <script>
+        requireAuth();
+
+        const AVATAR_KEY          = 'noted_avatar';
+        const USERNAME_CHANGED_KEY = 'noted_username_changed_at';
+        const COOLDOWN_DAYS        = 7;
+        const COOLDOWN_MS          = COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+
+        let passwordVisible = false;
+        let storedPassword  = '';
+
+        // ── Toggle password ────────────────────────────────────────────
+        function togglePassword() {
+            passwordVisible = !passwordVisible;
+            const pwEl  = document.getElementById('profile-password');
+            const btnEl = document.getElementById('toggle-pw-btn');
+            if (passwordVisible) {
+                pwEl.textContent  = storedPassword || '(tidak tersedia — backend tidak mengembalikan password)';
+                btnEl.textContent = '🙈 Sembunyikan';
+            } else {
+                pwEl.textContent  = '••••••••';
+                btnEl.textContent = '👁 Lihat';
+            }
+        }
+
+        // ── Avatar ─────────────────────────────────────────────────────
+        function handleAvatarChange(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Batas ukuran 2MB
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Ukuran foto maksimal 2MB.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64 = e.target.result;
+                localStorage.setItem(AVATAR_KEY, base64);
+                renderAvatar(base64);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderAvatar(base64OrInitial) {
+            const el = document.getElementById('profile-avatar');
+            if (base64OrInitial && base64OrInitial.startsWith('data:')) {
+                el.innerHTML = `<img src="${base64OrInitial}" alt="avatar">`;
+            } else {
+                el.innerHTML = '';
+                el.textContent = base64OrInitial || '?';
+            }
+        }
+
+        // ── Username change dengan 7-day cooldown ─────────────────────
+        function checkCooldown() {
+            const lastChanged = localStorage.getItem(USERNAME_CHANGED_KEY);
+            if (!lastChanged) return { canChange: true, daysLeft: 0 };
+            const diff     = Date.now() - parseInt(lastChanged, 10);
+            const daysLeft = Math.ceil((COOLDOWN_MS - diff) / (24 * 60 * 60 * 1000));
+            return { canChange: diff >= COOLDOWN_MS, daysLeft: Math.max(0, daysLeft) };
+        }
+
+        function updateCooldownUI() {
+            const { canChange, daysLeft } = checkCooldown();
+            const btn = document.getElementById('btn-save-username');
+            const msg = document.getElementById('cooldown-msg');
+            if (canChange) {
+                btn.disabled = false;
+                msg.textContent = '';
+            } else {
+                btn.disabled = true;
+                msg.textContent = `⏳ Ganti username lagi dalam ${daysLeft} hari.`;
+            }
+        }
+
+        async function saveUsername() {
+            const { canChange } = checkCooldown();
+            if (!canChange) return;
+
+            const newUsername = document.getElementById('input-new-username').value.trim();
+            if (!newUsername) { alert('Masukkan username baru.'); return; }
+
+            const btn = document.getElementById('btn-save-username');
+            btn.disabled = true;
+            btn.textContent = 'Menyimpan...';
+
+            try {
+                const res  = await AuthAPI.updateProfile({ username: newUsername });
+                const user = res.user || res.data || res;
+
+                // Update localStorage
+                Auth.setUser({ ...Auth.getUser(), username: user.username || newUsername });
+                localStorage.setItem(USERNAME_CHANGED_KEY, Date.now().toString());
+
+                document.getElementById('username-display').textContent = user.username || newUsername;
+                document.getElementById('input-new-username').value = '';
+                updateCooldownUI();
+
+                showSuccess('Username berhasil diubah!');
+            } catch (err) {
+                alert('Gagal mengubah username: ' + (err.message || 'Unknown error'));
+                btn.disabled = false;
+            }
+            btn.textContent = 'Simpan';
+        }
+
+        // ── Load profile ───────────────────────────────────────────────
+        async function loadProfile() {
+            try {
+                const res  = await AuthAPI.me();
+                const user = res.user || res.data || res;
+                Auth.setUser(user);
+                renderProfile(user);
+            } catch (_) {
+                // Fallback localStorage
+                const localUser = Auth.getUser();
+                if (localUser) renderProfile(localUser);
+                else {
+                    document.getElementById('error-profile').textContent = 'Gagal memuat profil.';
+                    document.getElementById('error-profile').style.display = 'block';
+                }
+            }
+        }
+
+        function renderProfile(user) {
+            const username  = user.username || user.name || 'User';
+            const email     = user.email    || '-';
+            const createdAt = user.createdAt || user.created_at || null;
+
+            document.getElementById('username-display').textContent = username;
+            document.getElementById('input-new-username').placeholder = username;
+            document.getElementById('profile-email').textContent = email;
+
+            // Password
+            storedPassword = user.password || '';
+            if (!storedPassword) {
+                document.getElementById('toggle-pw-btn').style.display = 'none';
+                document.getElementById('profile-password').textContent = '(tidak dapat ditampilkan)';
+            }
+
+            // Created At
+            if (createdAt) {
+                const d = new Date(createdAt);
+                document.getElementById('profile-created-at').textContent =
+                    d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            } else {
+                document.getElementById('profile-created-at').textContent = 'Tidak diketahui';
+            }
+
+            // Avatar: cek localStorage dulu
+            const savedAvatar = localStorage.getItem(AVATAR_KEY);
+            if (savedAvatar) {
+                renderAvatar(savedAvatar);
+            } else {
+                renderAvatar(username.charAt(0).toUpperCase());
+            }
+
+            updateCooldownUI();
+        }
+
+        function showSuccess(msg) {
+            const el = document.getElementById('success-profile');
+            el.textContent = msg;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 3000);
+        }
+
+        loadProfile();
+    </script>
 </body>
 </html>

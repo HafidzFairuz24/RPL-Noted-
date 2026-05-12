@@ -17,8 +17,8 @@
             <div class="form-group-wrapper">
                 <form id="login-form">
                     <div class="input-group">
-                        <label for="username">Username</label>
-                        <input type="text" id="username" name="username" required>
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
                     </div>
                     <div class="input-group">
                         <label for="password">Password</label>
@@ -41,15 +41,15 @@
         }
 
         async function handleLogin() {
-            const username = document.getElementById('username').value.trim();
+            const email    = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
             const btn      = document.getElementById('login-btn');
             const errMsg   = document.getElementById('error-msg');
 
             errMsg.style.display = 'none';
 
-            if (!username || !password) {
-                errMsg.textContent = 'Username dan password wajib diisi.';
+            if (!email || !password) {
+                errMsg.textContent = 'Email dan password wajib diisi.';
                 errMsg.style.display = 'block';
                 return;
             }
@@ -58,13 +58,13 @@
             btn.textContent = 'Loading...';
 
             try {
-                const res = await AuthAPI.login({ username, password });
+                const res = await AuthAPI.login({ email, password });
                 // Simpan token & user ke localStorage
                 Auth.setToken(res.token);
                 Auth.setUser(res.user);
                 window.location.href = 'dashboard.html';
             } catch (err) {
-                errMsg.textContent = err.message || 'Login gagal. Periksa username dan password.';
+                errMsg.textContent = err.message || 'Login gagal. Periksa email dan password.';
                 errMsg.style.display = 'block';
                 btn.disabled = false;
                 btn.textContent = 'Log In';

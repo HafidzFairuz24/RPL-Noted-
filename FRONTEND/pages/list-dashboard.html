@@ -5,10 +5,26 @@
     <title>Noted! - List Dashboard</title>
     <link rel="stylesheet" href="../css/dashboard.css">
     <style>
-        .list-header-banner { background-color: var(--sidebar-red); color: white; padding: 2rem; border-radius: 8px; margin-bottom: 2rem; font-family: var(--font-heading); }
+        .list-header-banner { background-color: var(--sidebar-red); color: white; padding: 2rem; border-radius: 8px; margin-bottom: 2rem; font-family: var(--font-heading); position: relative; }
         .list-header-banner h2 { font-size: 2.5rem; margin-bottom: 0.5rem; }
-        .task-bar { background-color: var(--card-gray); padding: 1.5rem 2rem; border-radius: 8px; margin-bottom: 1rem; font-family: var(--font-heading); font-size: 2rem; color: var(--text-dark); display: block; text-decoration: none; transition: transform 0.2s; }
+        .btn-edit-list-header {
+            position: absolute; top: 1rem; right: 1rem;
+            background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4);
+            padding: 0.4rem 1.2rem; border-radius: 6px; cursor: pointer;
+            font-family: var(--font-heading); font-size: 0.9rem; backdrop-filter: blur(4px);
+        }
+        .btn-edit-list-header:hover { background: rgba(255,255,255,0.35); }
+        .task-bar { background-color: var(--card-gray); padding: 1.2rem 2rem; border-radius: 8px; margin-bottom: 1rem; font-family: var(--font-heading); font-size: 1.8rem; color: var(--text-dark); display: flex; align-items: center; text-decoration: none; transition: transform 0.2s; }
         .task-bar:hover { transform: scale(1.01); background-color: #d0d0d0; }
+        .task-bar-name { flex: 1; }
+        .task-bar.done .task-bar-name { text-decoration: line-through; opacity: 0.5; }
+        .btn-edit-task-item {
+            background: var(--sidebar-red); color: white; border: none;
+            padding: 0.3rem 0.9rem; border-radius: 5px; cursor: pointer;
+            font-family: var(--font-heading); font-size: 0.8rem;
+            margin-left: 1rem; flex-shrink: 0; transition: opacity 0.2s;
+        }
+        .btn-edit-task-item:hover { opacity: 0.8; }
         .add-task-btn { background-color: var(--sidebar-red); width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; color: white; font-size: 2rem; border-radius: 8px; margin: 2rem auto; cursor: pointer; border: none; transition: transform 0.2s;}
         .add-task-btn:hover { transform: scale(1.1); }
 
@@ -54,8 +70,9 @@
         </div>
 
         <div class="list-header-banner">
+            <button class="btn-edit-list-header" id="btn-edit-list">✏️ Edit List</button>
             <h2 id="list-name">List</h2>
-            <p id="list-desc">Memuat deskripsi...</p>
+            <p id="list-desc"></p>
         </div>
 
         <p id="error-list"></p>
@@ -78,6 +95,11 @@
             window.location.href = `workspace-dashboard.html?workspaceId=${workspaceId}`;
         };
 
+        // Edit list → list-setting dalam mode edit
+        document.getElementById('btn-edit-list').onclick = function() {
+            window.location.href = `list-setting.html?workspaceId=${workspaceId}&listId=${listId}&mode=edit`;
+        };
+
         // Tambah task
         document.getElementById('add-task-btn').onclick = function() {
             window.location.href = `task-setting.html?workspaceId=${workspaceId}&listId=${listId}`;
@@ -85,9 +107,8 @@
 
         async function loadList() {
             if (!workspaceId || !listId) {
-                document.getElementById('error-list').textContent = 'Parameter URL tidak lengkap.';
-                document.getElementById('error-list').style.display = 'block';
-                document.getElementById('loading-msg').style.display = 'none';
+                // Redirect ke dashboard jika params tidak ada
+                window.location.href = 'dashboard.html';
                 return;
             }
 
@@ -112,9 +133,23 @@
 
                 tasks.forEach(task => {
                     const a = document.createElement('a');
-                    a.className   = 'task-bar' + (task.status === 'done' || task.isDone ? ' done' : '');
-                    a.textContent = task.title || task.name || 'Untitled Task';
-                    a.href        = `task-page.html?workspaceId=${workspaceId}&listId=${listId}&taskId=${task._id || task.id}`;
+                    a.className = 'task-bar' + (task.status === 'done' ? ' done' : '');
+                    a.href      = `task-page.html?workspaceId=${workspaceId}&listId=${listId}&taskId=${task.id}`;
+
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className   = 'task-bar-name';
+                    nameSpan.textContent = task.title || 'Untitled Task';
+
+                    const editBtn = document.createElement('button');
+                    editBtn.className   = 'btn-edit-task-item';
+                    editBtn.textContent = '✏️ Edit';
+                    editBtn.onclick     = function(e) {
+                        e.preventDefault(); e.stopPropagation();
+                        window.location.href = `task-setting.html?workspaceId=${workspaceId}&listId=${listId}&taskId=${task.id}&mode=edit`;
+                    };
+
+                    a.appendChild(nameSpan);
+                    a.appendChild(editBtn);
                     container.appendChild(a);
                 });
 

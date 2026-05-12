@@ -6,55 +6,57 @@
     <title>Noted! - Workspace Dashboard</title>
     <link rel="stylesheet" href="../css/dashboard.css">
     <style>
-        .workspace-header-banner { 
-            background-color: var(--sidebar-red); 
-            color: white; 
-            padding: 2rem; 
-            border-radius: 8px; 
-            margin-bottom: 2rem; 
-            font-family: var(--font-heading);
-            position: relative; 
+        /* Header banner dengan background image support */
+        .workspace-header-banner {
+            color: white; padding: 2rem; border-radius: 8px;
+            margin-bottom: 2rem; font-family: var(--font-heading);
+            position: relative; overflow: hidden;
+            background-color: var(--sidebar-red);
+            min-height: 130px; display: flex; flex-direction: column; justify-content: flex-end;
         }
-        .workspace-header-banner h2 { 
-            font-size: 2.5rem; 
-            margin-bottom: 0.5rem; 
+        .ws-bg-img {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; opacity: 0.35; z-index: 0;
         }
-        .owned-by {
-            position: absolute;
-            bottom: 1rem;
-            right: 2rem;
-            font-size: 1.1rem;
+        .ws-header-content { position: relative; z-index: 1; }
+        .workspace-header-banner h2 { font-size: 2.5rem; margin-bottom: 0.3rem; }
+        .owned-by { font-size: 1.1rem; opacity: 0.85; }
+
+        /* Edit button di kanan atas banner */
+        .btn-edit-ws {
+            position: absolute; top: 1rem; right: 1rem; z-index: 2;
+            background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.5);
+            padding: 0.4rem 1.2rem; border-radius: 6px; cursor: pointer;
+            font-family: var(--font-heading); font-size: 0.9rem; transition: background 0.2s;
+            backdrop-filter: blur(4px);
         }
-        .list-bar { 
-            background-color: var(--card-gray); 
-            padding: 1.5rem 2rem; 
-            border-radius: 8px; 
-            margin-bottom: 1rem; 
-            font-family: var(--font-heading); 
-            font-size: 2rem; 
-            color: var(--text-dark); 
-            display: block; 
-            text-decoration: none; 
-            transition: transform 0.2s; 
+        .btn-edit-ws:hover { background: rgba(255,255,255,0.35); }
+
+        /* List bars */
+        .list-bar {
+            background-color: var(--card-gray); padding: 1.5rem 2rem; border-radius: 8px;
+            margin-bottom: 1rem; font-family: var(--font-heading); font-size: 2rem;
+            color: var(--text-dark); display: flex; align-items: center;
+            text-decoration: none; transition: transform 0.2s;
         }
-        .list-bar:hover { 
-            transform: scale(1.01); 
-            background-color: #d0d0d0; 
+        .list-bar:hover { transform: scale(1.01); background-color: #d0d0d0; }
+        .list-bar-name { flex: 1; }
+        .btn-edit-list {
+            background: var(--sidebar-red); color: white; border: none;
+            padding: 0.3rem 0.9rem; border-radius: 5px; cursor: pointer;
+            font-family: var(--font-heading); font-size: 0.85rem;
+            margin-left: 1rem; transition: opacity 0.2s; flex-shrink: 0;
         }
-        .add-list-btn { 
-            background-color: var(--sidebar-red); 
-            width: 60px; 
-            height: 60px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            color: white; 
-            font-size: 2rem; 
-            border-radius: 8px; 
-            margin: 2rem auto; 
-            cursor: pointer; 
-            border: none; 
+        .btn-edit-list:hover { opacity: 0.8; }
+
+        .add-list-btn {
+            background-color: var(--sidebar-red); width: 60px; height: 60px;
+            display: flex; justify-content: center; align-items: center;
+            color: white; font-size: 2rem; border-radius: 8px;
+            margin: 2rem auto; cursor: pointer; border: none; transition: transform 0.2s;
         }
+        .add-list-btn:hover { transform: scale(1.1); }
+
         #loading-msg { font-family: var(--font-heading); color: var(--text-dark); opacity: 0.6; text-align: center; padding: 2rem; }
         #error-ws { color: #c0392b; font-family: var(--font-heading); padding: 1rem; display: none; }
     </style>
@@ -69,15 +71,23 @@
             <a href="notification.html" class="nav-btn">Notification</a>
         </nav>
         <div class="sidebar-footer">
-            <a href="#" class="nav-btn" style="display: block;" onclick="Auth.logout()">Log Out</a>
+            <a href="#" class="nav-btn" style="display:block;" onclick="Auth.logout()">Log Out</a>
         </div>
     </aside>
 
     <main class="main-content">
-        <div class="workspace-header-banner">
-            <h2 id="ws-name">Workspace</h2>
-            <p id="ws-desc">Memuat deskripsi...</p>
-            <span class="owned-by" id="ws-owner">Owned By: ...</span>
+        <!-- Header Banner -->
+        <div class="workspace-header-banner" id="ws-banner">
+            <!-- Background image (jika ada) -->
+            <img id="ws-bg-img" class="ws-bg-img" alt="" style="display:none;">
+            <!-- Tombol Edit Workspace -->
+            <button class="btn-edit-ws" id="btn-edit-ws">✏️ Edit Workspace</button>
+            <!-- Konten teks -->
+            <div class="ws-header-content">
+                <h2 id="ws-name">Workspace</h2>
+                <p id="ws-desc"></p>
+                <span class="owned-by" id="ws-owner">Owned By: ...</span>
+            </div>
         </div>
 
         <p id="error-ws"></p>
@@ -85,40 +95,48 @@
 
         <div id="list-container"></div>
 
-        <button class="add-list-btn" id="add-list-btn">+</button>
+        <button class="add-list-btn" id="add-list-btn" title="Tambah List">+</button>
     </main>
 
     <script>
         requireAuth();
 
-        // Ambil workspaceId dari URL
         const params      = new URLSearchParams(window.location.search);
         const workspaceId = params.get('workspaceId');
 
-        // Tombol tambah list → teruskan workspaceId
+        if (!workspaceId) { window.location.href = 'dashboard.html'; }
+
+        // Tombol edit workspace → ke workspace-setting dengan mode edit
+        document.getElementById('btn-edit-ws').onclick = function() {
+            window.location.href = `workspace-setting.html?workspaceId=${workspaceId}`;
+        };
+
+        // Tombol tambah list
         document.getElementById('add-list-btn').onclick = function() {
             window.location.href = `list-setting.html?workspaceId=${workspaceId}`;
         };
 
         async function loadWorkspace() {
-            if (!workspaceId) {
-                document.getElementById('error-ws').textContent = 'workspaceId tidak ditemukan di URL.';
-                document.getElementById('error-ws').style.display = 'block';
-                document.getElementById('loading-msg').style.display = 'none';
-                return;
-            }
-
             try {
-                // Load detail workspace
+                // Load workspace detail
                 const wsRes = await WorkspaceAPI.getOne(workspaceId);
-                const ws = wsRes.workspace || wsRes.data || wsRes;
-                document.getElementById('ws-name').textContent  = ws.name  || ws.title || 'Workspace';
+                const ws    = wsRes.workspace || wsRes.data || wsRes;
+
+                document.getElementById('ws-name').textContent  = ws.name || 'Workspace';
                 document.getElementById('ws-desc').textContent  = ws.description || '';
-                document.getElementById('ws-owner').textContent = `Owned By: ${ws.owner?.username || ws.owner?.name || 'Unknown'}`;
+                document.getElementById('ws-owner').textContent = `Owned By: ${ws.owner_name || 'Unknown'}`;
+
+                // Background image dari localStorage
+                const savedImg = localStorage.getItem(`noted_ws_img_${workspaceId}`);
+                if (savedImg) {
+                    const imgEl = document.getElementById('ws-bg-img');
+                    imgEl.src           = savedImg;
+                    imgEl.style.display = 'block';
+                }
 
                 // Load lists
                 const listRes  = await ListAPI.getAll(workspaceId);
-                const lists    = Array.isArray(listRes) ? listRes : (listRes.lists || listRes.data || []);
+                const lists    = Array.isArray(listRes) ? listRes : (listRes.lists || []);
                 const container = document.getElementById('list-container');
                 document.getElementById('loading-msg').style.display = 'none';
 
@@ -129,10 +147,28 @@
                 }
 
                 lists.forEach(list => {
+                    // Wrapper agar tombol edit tidak trigger navigasi
+                    const wrapper = document.createElement('div');
+                    wrapper.style.position = 'relative';
+
                     const a = document.createElement('a');
-                    a.className   = 'list-bar';
-                    a.textContent = list.name || list.title || 'Untitled List';
-                    a.href        = `list-dashboard.html?workspaceId=${workspaceId}&listId=${list._id || list.id}`;
+                    a.className = 'list-bar';
+                    a.href      = `list-dashboard.html?workspaceId=${workspaceId}&listId=${list.id}`;
+
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className   = 'list-bar-name';
+                    nameSpan.textContent = list.name || 'Untitled List';
+
+                    const editBtn = document.createElement('button');
+                    editBtn.className   = 'btn-edit-list';
+                    editBtn.textContent = '✏️ Edit';
+                    editBtn.onclick     = function(e) {
+                        e.preventDefault(); e.stopPropagation();
+                        window.location.href = `list-setting.html?workspaceId=${workspaceId}&listId=${list.id}&mode=edit`;
+                    };
+
+                    a.appendChild(nameSpan);
+                    a.appendChild(editBtn);
                     container.appendChild(a);
                 });
 

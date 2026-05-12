@@ -6,47 +6,85 @@
     <link rel="stylesheet" href="../css/auth.css">
     <style>
         .auth-card { max-width: 900px; text-align: left; padding: 2rem; }
-        .input-wide { width: 100%; background: var(--bg-cream); color: var(--text-dark); border: none; padding: 1rem; border-radius: 6px; font-family: var(--font-heading); font-size: 1.2rem; margin-bottom: 1rem; }
-        
-        /* Penyesuaian ukuran font dan opacity pada deskripsi */
-        .textarea-wide { 
-            width: 100%; 
-            background: var(--bg-cream); 
-            color: var(--text-dark); 
-            border: none; 
-            padding: 2rem; 
-            border-radius: 6px; 
-            font-family: var(--font-heading); 
-            font-size: 1.2rem; /* Ukuran diperkecil dari 2.5rem */
-            opacity: 0.6;      /* Opacity dikurangi agar lebih samar */
-            min-height: 200px; 
-            margin-bottom: 1.5rem; 
-            resize: none; 
-            text-align: center; 
+
+        .page-heading { color: white; font-family: var(--font-heading); font-size: 1.8rem; margin-bottom: 1.5rem; }
+
+        .input-wide {
+            width: 100%; background: var(--bg-cream); color: var(--text-dark);
+            border: none; padding: 1rem; border-radius: 6px;
+            font-family: var(--font-heading); font-size: 1.2rem;
+            margin-bottom: 1rem; outline: none;
         }
-        
+        .textarea-wide {
+            width: 100%; background: var(--bg-cream); color: var(--text-dark);
+            border: none; padding: 2rem; border-radius: 6px;
+            font-family: var(--font-heading); font-size: 1.2rem; opacity: 0.6;
+            min-height: 200px; margin-bottom: 1.5rem; resize: none; outline: none;
+        }
+        .input-wide::placeholder, .textarea-wide::placeholder { color: var(--text-dark); opacity: 0.5; }
+
+        /* Image upload */
+        .img-upload-section { margin-bottom: 1.5rem; }
+        .img-upload-label {
+            color: white; font-family: var(--font-heading); font-size: 1.1rem; margin-bottom: 0.5rem; display: block;
+        }
+        .img-upload-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        .btn-upload-img {
+            background: var(--card-gray); color: var(--text-dark); border: none;
+            padding: 0.6rem 1.5rem; border-radius: 6px; cursor: pointer;
+            font-family: var(--font-heading); font-size: 1rem; transition: background 0.2s;
+        }
+        .btn-upload-img:hover { background: #c0c0c0; }
+        .img-preview {
+            width: 120px; height: 70px; border-radius: 8px; object-fit: cover;
+            border: 2px solid rgba(255,255,255,0.3); display: none;
+        }
+        .btn-remove-img {
+            background: none; border: none; color: #ff6b6b; cursor: pointer;
+            font-family: var(--font-heading); font-size: 0.9rem; display: none;
+        }
+        #img-file-input { display: none; }
+
+        /* Member Section */
         .member-section { margin-top: 1rem; font-family: var(--font-heading); font-size: 1.2rem; }
-        .member-btn { background: var(--card-gray); color: var(--text-dark); border: none; padding: 0.5rem 1rem; border-radius: 4px; margin-top: 0.5rem; cursor: pointer; font-family: var(--font-heading); }
-        
-        /* Container member dikosongkan */
-        .member-list { 
-            background: var(--card-gray); 
-            color: var(--text-dark); 
-            padding: 1rem; 
-            border-radius: 6px; 
-            margin-top: 0.5rem; 
-            min-height: 100px; 
-            max-width: 450px; 
-            font-family: var(--font-heading); 
-            display: flex; 
-            flex-direction: column; 
-            gap: 0.5rem; 
+        .member-section > p { margin-bottom: 0.8rem; color: white; }
+        .add-member-row { display: flex; gap: 0.8rem; margin-bottom: 1rem; }
+        .input-member {
+            flex: 1; background: var(--bg-cream); color: var(--text-dark);
+            border: none; padding: 0.7rem 1rem; border-radius: 6px;
+            font-family: var(--font-heading); font-size: 1rem; outline: none;
         }
-        
-        .member-row { display: flex; justify-content: space-between; align-items: center; }
-        .member-role { font-size: 0.8rem; font-family: var(--font-body); }
+        .input-member::placeholder { opacity: 0.6; }
+        .btn-add-member {
+            background: var(--card-gray); color: var(--text-dark); border: none;
+            padding: 0.7rem 1.5rem; border-radius: 6px; cursor: pointer;
+            font-family: var(--font-heading); font-size: 1rem; white-space: nowrap; transition: background 0.2s;
+        }
+        .btn-add-member:hover { background: #c0c0c0; }
+        .member-list {
+            background: var(--card-gray); color: var(--text-dark); padding: 1rem;
+            border-radius: 6px; margin-top: 0.5rem; min-height: 60px;
+            font-family: var(--font-heading); display: flex; flex-direction: column; gap: 0.5rem;
+        }
+        .member-row {
+            display: flex; justify-content: space-between; align-items: center;
+            background: white; padding: 0.5rem 1rem; border-radius: 4px;
+        }
+        .member-name { font-size: 1rem; }
+        .member-remove { background: none; border: none; color: #c0392b; cursor: pointer; font-size: 1rem; }
+        .member-empty { opacity: 0.5; font-size: 0.95rem; text-align: center; padding: 0.5rem; }
+
         .action-buttons { display: flex; justify-content: space-between; margin-top: 2rem; }
-        .btn-action { background: var(--bg-cream); color: var(--text-dark); border: none; padding: 0.6rem 2.5rem; font-size: 1.2rem; border-radius: 4px; cursor: pointer; font-family: var(--font-heading); }
+        .btn-action {
+            background: var(--bg-cream); color: var(--text-dark); border: none;
+            padding: 0.6rem 2.5rem; font-size: 1.2rem; border-radius: 4px;
+            cursor: pointer; font-family: var(--font-heading); transition: transform 0.2s;
+        }
+        .btn-action:hover { transform: scale(1.05); }
+        .btn-action.primary { background: var(--sidebar-red); color: white; }
+        .btn-action.primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        #error-ws { color: #ff6b6b; font-family: var(--font-heading); margin-top: 0.5rem; display: none; }
     </style>
 </head>
 <script src="../js/api.js"></script>
@@ -54,26 +92,197 @@
     <div class="corner-decoration"></div>
     <div class="auth-container">
         <div class="auth-card">
-            <input type="text" class="input-wide" placeholder="Workspace Name">
-            
-            <textarea class="textarea-wide" placeholder="Workspace Description //(Max 1000 Characters)"></textarea>
-            
-            <div class="member-section">
-                <p>Apply Member :</p>
-                <button class="member-btn">Add Member (User id)</button>
-                <div class="member-list" id="memberList">
-                    </div>
+            <h2 class="page-heading" id="page-heading">Buat Workspace Baru</h2>
+
+            <input type="text" class="input-wide" id="ws-name" placeholder="Workspace Name">
+            <textarea class="textarea-wide" id="ws-desc" placeholder="Workspace Description //(Max 1000 Characters)"></textarea>
+
+            <!-- Background Image Upload -->
+            <div class="img-upload-section">
+                <label class="img-upload-label">📷 Gambar Background/Header Workspace:</label>
+                <div class="img-upload-row">
+                    <button class="btn-upload-img" type="button" onclick="document.getElementById('img-file-input').click()">Pilih Gambar</button>
+                    <input type="file" id="img-file-input" accept="image/*" onchange="handleImgUpload(event)">
+                    <img id="img-preview" class="img-preview" alt="preview">
+                    <button class="btn-remove-img" id="btn-remove-img" type="button" onclick="removeImg()">✕ Hapus</button>
+                </div>
             </div>
 
+            <!-- Member Section -->
+            <div class="member-section">
+                <p>Apply Member :</p>
+                <div class="add-member-row">
+                    <input type="text" class="input-member" id="member-email-input" placeholder="Masukkan email member">
+                    <button class="btn-add-member" onclick="addMemberToList()">+ Add Member</button>
+                </div>
+                <div class="member-list" id="member-list">
+                    <p class="member-empty" id="member-empty-msg">Belum ada member ditambahkan.</p>
+                </div>
+            </div>
+
+            <p id="error-ws"></p>
+
             <div class="action-buttons">
-                <button class="btn-action" onclick="window.location.href='dashboard.html'">Cancel</button>
-                <button class="btn-action" onclick="window.location.href='dashboard.html'">Add</button>
+                <button class="btn-action" id="btn-cancel">Cancel</button>
+                <button class="btn-action primary" id="btn-submit" onclick="submitWorkspace()">Buat Workspace</button>
             </div>
         </div>
     </div>
-</body>
 
-</html>
-    </div>
+    <script>
+        requireAuth();
+
+        const params      = new URLSearchParams(window.location.search);
+        const workspaceId = params.get('workspaceId');   // ada = edit mode
+        const isEditMode  = !!workspaceId;
+
+        const memberList    = [];
+        let   selectedImage = null;  // base64 string
+
+        // ── Cancel button ─────────────────────────────────────────────
+        document.getElementById('btn-cancel').onclick = function() {
+            if (isEditMode) {
+                window.location.href = `workspace-dashboard.html?workspaceId=${workspaceId}`;
+            } else {
+                window.location.href = 'dashboard.html';
+            }
+        };
+
+        // ── Setup UI berdasarkan mode ─────────────────────────────────
+        if (isEditMode) {
+            document.getElementById('page-heading').textContent = 'Edit Workspace';
+            document.getElementById('btn-submit').textContent   = 'Simpan Perubahan';
+            loadExistingWorkspace();
+        }
+
+        // ── Load data workspace (edit mode) ───────────────────────────
+        async function loadExistingWorkspace() {
+            try {
+                const res = await WorkspaceAPI.getOne(workspaceId);
+                const ws  = res.workspace || res.data || res;
+
+                document.getElementById('ws-name').value = ws.name  || '';
+                document.getElementById('ws-desc').value = ws.description || '';
+
+                // Load gambar dari localStorage
+                const savedImg = localStorage.getItem(`noted_ws_img_${workspaceId}`);
+                if (savedImg) {
+                    selectedImage = savedImg;
+                    showPreview(savedImg);
+                }
+            } catch (err) {
+                document.getElementById('error-ws').textContent = 'Gagal memuat data: ' + err.message;
+                document.getElementById('error-ws').style.display = 'block';
+            }
+        }
+
+        // ── Image upload ──────────────────────────────────────────────
+        function handleImgUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (file.size > 3 * 1024 * 1024) { alert('Ukuran gambar maksimal 3MB.'); return; }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                selectedImage = e.target.result;
+                showPreview(selectedImage);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function showPreview(src) {
+            const img = document.getElementById('img-preview');
+            const btn = document.getElementById('btn-remove-img');
+            img.src = src; img.style.display = 'block'; btn.style.display = 'inline-block';
+        }
+
+        function removeImg() {
+            selectedImage = null;
+            document.getElementById('img-preview').style.display = 'none';
+            document.getElementById('btn-remove-img').style.display = 'none';
+            document.getElementById('img-file-input').value = '';
+            if (isEditMode) localStorage.removeItem(`noted_ws_img_${workspaceId}`);
+        }
+
+        // ── Member list UI ────────────────────────────────────────────
+        function addMemberToList() {
+            const input = document.getElementById('member-email-input');
+            const value = input.value.trim();
+            if (!value) { alert('Masukkan email member.'); return; }
+            if (memberList.includes(value)) { alert('Member sudah ditambahkan.'); return; }
+            memberList.push(value);
+            input.value = '';
+            renderMemberList();
+        }
+
+        document.getElementById('member-email-input').addEventListener('keydown', e => {
+            if (e.key === 'Enter') addMemberToList();
+        });
+
+        function removeMember(index) { memberList.splice(index, 1); renderMemberList(); }
+
+        function renderMemberList() {
+            const listEl   = document.getElementById('member-list');
+            const emptyMsg = document.getElementById('member-empty-msg');
+            listEl.querySelectorAll('.member-row').forEach(el => el.remove());
+            emptyMsg.style.display = memberList.length === 0 ? 'block' : 'none';
+            memberList.forEach((m, i) => {
+                const row = document.createElement('div');
+                row.className = 'member-row';
+                row.innerHTML = `<span class="member-name">${m}</span><button class="member-remove" onclick="removeMember(${i})">✕</button>`;
+                listEl.appendChild(row);
+            });
+        }
+
+        // ── Submit (create atau edit) ─────────────────────────────────
+        async function submitWorkspace() {
+            const name  = document.getElementById('ws-name').value.trim();
+            const desc  = document.getElementById('ws-desc').value.trim();
+            const btn   = document.getElementById('btn-submit');
+            const errEl = document.getElementById('error-ws');
+
+            errEl.style.display = 'none';
+            if (!name) { errEl.textContent = 'Nama workspace wajib diisi.'; errEl.style.display = 'block'; return; }
+
+            btn.disabled = true;
+            btn.textContent = isEditMode ? 'Menyimpan...' : 'Membuat...';
+
+            try {
+                let targetId = workspaceId;
+
+                if (isEditMode) {
+                    // UPDATE
+                    await WorkspaceAPI.update(workspaceId, { name, description: desc });
+                } else {
+                    // CREATE
+                    const res = await WorkspaceAPI.create({ name, description: desc });
+                    targetId  = res.workspaceId || res.workspace?.id || res.id;
+
+                    // Tambahkan member
+                    for (const email of memberList) {
+                        try { await WorkspaceAPI.addMember(targetId, email); } catch (_) {}
+                    }
+                }
+
+                // Simpan gambar background ke localStorage (keyed by workspaceId)
+                if (selectedImage) {
+                    localStorage.setItem(`noted_ws_img_${targetId}`, selectedImage);
+                } else if (isEditMode) {
+                    localStorage.removeItem(`noted_ws_img_${targetId}`);
+                }
+
+                // Redirect ke workspace dashboard
+                window.location.href = isEditMode
+                    ? `workspace-dashboard.html?workspaceId=${targetId}`
+                    : 'dashboard.html';
+
+            } catch (err) {
+                errEl.textContent = (isEditMode ? 'Gagal menyimpan: ' : 'Gagal membuat: ') + (err.message || 'Unknown error');
+                errEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = isEditMode ? 'Simpan Perubahan' : 'Buat Workspace';
+            }
+        }
+    </script>
 </body>
 </html>

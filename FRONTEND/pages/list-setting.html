@@ -6,83 +6,33 @@
     <link rel="stylesheet" href="../css/auth.css">
     <style>
         .auth-card { max-width: 900px; text-align: left; padding: 2rem; }
-        
-        .input-wide { 
-            width: 100%; 
-            background: var(--bg-cream); 
-            color: var(--text-dark); 
-            border: none; 
-            padding: 1rem; 
-            border-radius: 6px; 
-            font-family: var(--font-heading); 
-            font-size: 1.2rem; 
-            margin-bottom: 1rem; 
+        .page-heading { color: white; font-family: var(--font-heading); font-size: 1.8rem; margin-bottom: 1.5rem; }
+        .input-wide {
+            width: 100%; background: var(--bg-cream); color: var(--text-dark);
+            border: none; padding: 1rem; border-radius: 6px;
+            font-family: var(--font-heading); font-size: 1.2rem;
+            margin-bottom: 1rem; outline: none;
         }
-        
-        
-        .textarea-wide { 
-            width: 100%; 
-            background: var(--bg-cream); 
-            color: var(--text-dark); 
-            border: none; 
-            padding: 2rem; 
-            border-radius: 6px; 
-            font-family: var(--font-heading); 
-            font-size: 1.2rem; 
-            min-height: 200px; 
-            margin-bottom: 1.5rem; 
-            resize: none; 
-            text-align: center; 
+        .textarea-wide {
+            width: 100%; background: var(--bg-cream); color: var(--text-dark);
+            border: none; padding: 2rem; border-radius: 6px;
+            font-family: var(--font-heading); font-size: 1.2rem;
+            min-height: 200px; margin-bottom: 1.5rem; resize: none; outline: none;
         }
-
-        /* Membuat teks placeholder (petunjuk) menjadi transparan/samar */
-        .input-wide::placeholder, .textarea-wide::placeholder {
-            color: var(--text-dark);
-            opacity: 0.5; /* Opacity diperkecil */
-        }
-
-        .member-section { margin-top: 1rem; font-family: var(--font-heading); font-size: 1.2rem; }
-        .member-btn { 
-            background: var(--card-gray); 
-            color: var(--text-dark); 
-            border: none; 
-            padding: 0.5rem 1rem; 
-            border-radius: 4px; 
-            margin-top: 0.5rem; 
-            cursor: pointer; 
-            font-family: var(--font-heading); 
-            transition: 0.2s; 
-        }
-        .member-btn:hover { background: #d0d0d0; }
-        
-        /* Container member dikosongkan secara default */
-        .member-list { 
-            background: var(--card-gray); 
-            color: var(--text-dark); 
-            padding: 1rem; 
-            border-radius: 6px; 
-            margin-top: 0.5rem; 
-            min-height: 100px; 
-            max-width: 450px; 
-            font-family: var(--font-heading); 
-            display: flex; 
-            flex-direction: column; 
-            gap: 0.5rem;
-        }
-
+        .input-wide::placeholder, .textarea-wide::placeholder { color: var(--text-dark); opacity: 0.5; }
         .action-buttons { display: flex; justify-content: space-between; margin-top: 2rem; }
-        .btn-action { 
-            background: var(--bg-cream); 
-            color: var(--text-dark); 
-            border: none; 
-            padding: 0.6rem 2.5rem; 
-            font-size: 1.2rem; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-family: var(--font-heading); 
-            transition: transform 0.2s; 
+        .btn-action {
+            background: var(--bg-cream); color: var(--text-dark); border: none;
+            padding: 0.6rem 2.5rem; font-size: 1.2rem; border-radius: 4px;
+            cursor: pointer; font-family: var(--font-heading); transition: transform 0.2s;
         }
         .btn-action:hover { transform: scale(1.05); }
+        .btn-action.primary { background: var(--sidebar-red); color: white; }
+        .btn-action.primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        /* Delete button (edit mode only) */
+        .btn-action.danger { background: #c0392b; color: white; }
+        .btn-action.danger:hover { opacity: 0.85; }
+        #error-list { color: #ff6b6b; font-family: var(--font-heading); margin-top: 0.5rem; display: none; }
     </style>
 </head>
 <script src="../js/api.js"></script>
@@ -90,21 +40,98 @@
     <div class="corner-decoration"></div>
     <div class="auth-container">
         <div class="auth-card">
-            <input type="text" class="input-wide" placeholder="List Name">
-            
-            <textarea class="textarea-wide" placeholder="List Description //(Max 500 Characters)"></textarea>
-            
-            <div class="member-section">
-                <p>Apply Member :</p>
-                <button class="member-btn">Add Member (User id)</button>
-                <div class="member-list"></div>
-            </div>
+            <h2 class="page-heading" id="page-heading">Buat List Baru</h2>
+
+            <input type="text" class="input-wide" id="list-name" placeholder="List Name">
+            <textarea class="textarea-wide" id="list-desc" placeholder="List Description //(Max 500 Characters)" maxlength="500"></textarea>
+
+            <p id="error-list"></p>
 
             <div class="action-buttons">
-                <button class="btn-action" onclick="window.location.href='workspace-dashboard.html'">Cancel</button>
-                <button class="btn-action" onclick="window.location.href='workspace-dashboard.html'">Add</button>
+                <div style="display:flex; gap:0.8rem;">
+                    <button class="btn-action" id="btn-cancel">Cancel</button>
+                    <button class="btn-action danger" id="btn-delete" style="display:none;" onclick="deleteList()">🗑 Hapus List</button>
+                </div>
+                <button class="btn-action primary" id="btn-submit" onclick="submitList()">Buat List</button>
             </div>
         </div>
     </div>
+
+    <script>
+        requireAuth();
+
+        const params      = new URLSearchParams(window.location.search);
+        const workspaceId = params.get('workspaceId');
+        const listId      = params.get('listId');
+        const isEditMode  = params.get('mode') === 'edit' && !!listId;
+
+        if (!workspaceId) { window.location.href = 'dashboard.html'; }
+
+        // Cancel → kembali ke workspace dashboard
+        document.getElementById('btn-cancel').onclick = function() {
+            window.location.href = `workspace-dashboard.html?workspaceId=${workspaceId}`;
+        };
+
+        // Setup berdasarkan mode
+        if (isEditMode) {
+            document.getElementById('page-heading').textContent  = 'Edit List';
+            document.getElementById('btn-submit').textContent    = 'Simpan Perubahan';
+            document.getElementById('btn-delete').style.display  = 'inline-block';
+            loadExistingList();
+        }
+
+        async function loadExistingList() {
+            try {
+                const res  = await ListAPI.getOne(workspaceId, listId);
+                const list = res.list || res.data || res;
+                document.getElementById('list-name').value = list.name        || '';
+                document.getElementById('list-desc').value = list.description || '';
+            } catch (err) {
+                document.getElementById('error-list').textContent = 'Gagal memuat list: ' + err.message;
+                document.getElementById('error-list').style.display = 'block';
+            }
+        }
+
+        async function submitList() {
+            const name  = document.getElementById('list-name').value.trim();
+            const desc  = document.getElementById('list-desc').value.trim();
+            const btn   = document.getElementById('btn-submit');
+            const errEl = document.getElementById('error-list');
+
+            errEl.style.display = 'none';
+            if (!name) { errEl.textContent = 'Nama list wajib diisi.'; errEl.style.display = 'block'; return; }
+
+            btn.disabled    = true;
+            btn.textContent = isEditMode ? 'Menyimpan...' : 'Membuat...';
+
+            try {
+                if (isEditMode) {
+                    await ListAPI.update(workspaceId, listId, { name, description: desc });
+                } else {
+                    await ListAPI.create(workspaceId, { name, description: desc });
+                }
+                window.location.href = `workspace-dashboard.html?workspaceId=${workspaceId}`;
+            } catch (err) {
+                errEl.textContent   = (isEditMode ? 'Gagal menyimpan: ' : 'Gagal membuat: ') + (err.message || 'Unknown error');
+                errEl.style.display = 'block';
+                btn.disabled        = false;
+                btn.textContent     = isEditMode ? 'Simpan Perubahan' : 'Buat List';
+            }
+        }
+
+        async function deleteList() {
+            if (!confirm('Hapus list ini? Semua task di dalamnya juga akan terhapus.')) return;
+            try {
+                await ListAPI.delete(workspaceId, listId);
+                window.location.href = `workspace-dashboard.html?workspaceId=${workspaceId}`;
+            } catch (err) {
+                alert('Gagal menghapus list: ' + (err.message || 'Unknown error'));
+            }
+        }
+
+        document.getElementById('list-name').addEventListener('keydown', e => {
+            if (e.key === 'Enter') submitList();
+        });
+    </script>
 </body>
 </html>

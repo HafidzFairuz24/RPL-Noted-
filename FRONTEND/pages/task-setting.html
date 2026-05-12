@@ -5,127 +5,63 @@
     <title>Noted! - Task Setting</title>
     <link rel="stylesheet" href="../css/auth.css">
     <style>
-        /* Mengizinkan scroll pada halaman ini */
-        body { 
-            overflow-y: auto; 
-        }
-        
-        .auth-container { 
-            height: auto; 
-            min-height: 100vh; 
-            padding: 4rem 1rem; 
-            align-items: flex-start; 
-        }
+        body { overflow-y: auto; }
+        .auth-container { height: auto; min-height: 100vh; padding: 4rem 1rem; align-items: flex-start; }
+        .auth-card { max-width: 900px; text-align: left; padding: 2rem; margin: 0 auto; }
 
-        .auth-card { 
-            max-width: 900px; 
-            text-align: left; 
-            padding: 2rem; 
-            margin: 0 auto; 
-        }
-        
-        .input-wide { 
-            width: 100%; 
-            background: var(--bg-cream); 
-            color: var(--text-dark); 
-            border: none; 
-            padding: 1rem; 
-            border-radius: 6px; 
-            font-family: var(--font-heading); 
-            font-size: 1.2rem; 
-            margin-bottom: 1rem; 
-        }
-        
-        .textarea-wide { 
-            width: 100%; 
-            background: var(--bg-cream); 
-            color: var(--text-dark); 
-            border: none; 
-            padding: 2rem; 
-            border-radius: 6px; 
-            font-family: var(--font-heading); 
-            font-size: 1.2rem; 
-            min-height: 200px; 
-            margin-bottom: 1.5rem; 
-            resize: none; 
-            text-align: center; 
-        }
+        .page-heading { color: white; font-family: var(--font-heading); font-size: 1.8rem; margin-bottom: 1.5rem; }
 
-        .input-wide::placeholder, .textarea-wide::placeholder {
-            color: var(--text-dark);
-            opacity: 0.5;
+        .input-wide {
+            width: 100%; background: var(--bg-cream); color: var(--text-dark);
+            border: none; padding: 1rem; border-radius: 6px;
+            font-family: var(--font-heading); font-size: 1.2rem;
+            margin-bottom: 1rem; outline: none;
         }
+        .textarea-wide {
+            width: 100%; background: var(--bg-cream); color: var(--text-dark);
+            border: none; padding: 2rem; border-radius: 6px;
+            font-family: var(--font-heading); font-size: 1.2rem;
+            min-height: 200px; margin-bottom: 1.5rem; resize: none; outline: none;
+        }
+        .input-wide::placeholder, .textarea-wide::placeholder { color: var(--text-dark); opacity: 0.5; }
 
-        .grid-2col { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 2rem; 
-            margin-bottom: 2rem;
-        }
-        
-        .section-title { 
-            font-family: var(--font-heading); 
-            font-size: 1.2rem; 
-            margin-bottom: 0.5rem; 
-            margin-top: 1rem; 
-        }
-        
-        .btn-gray { 
-            background: var(--card-gray); 
-            color: var(--text-dark); 
-            border: none; 
-            padding: 0.5rem 1rem; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            display: inline-block; 
-            margin-bottom: 0.5rem; 
-            font-family: var(--font-heading); 
-            transition: 0.2s;
-        }
-        
-        .btn-gray:hover { 
-            background: #d0d0d0; 
-        }
-        
-        .member-list { 
-            background: var(--card-gray); 
-            color: var(--text-dark); 
-            padding: 1rem; 
-            border-radius: 6px; 
-            min-height: 100px; 
-            font-family: var(--font-heading); 
-            max-width: 350px;
-        }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+        .section-title { font-family: var(--font-heading); font-size: 1.1rem; margin-bottom: 0.5rem; margin-top: 1rem; color: white; }
 
-        .file-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            max-width: 350px;
-            margin-top: 0.5rem;
+        .select-styled {
+            width: 100%; background: var(--bg-cream); color: var(--text-dark);
+            border: none; padding: 0.7rem 1rem; border-radius: 6px;
+            font-family: var(--font-heading); font-size: 1rem;
+            margin-bottom: 0.8rem; cursor: pointer; outline: none;
         }
+        .input-date {
+            width: 100%; background: var(--bg-cream); color: var(--text-dark);
+            border: none; padding: 0.7rem 1rem; border-radius: 6px;
+            font-family: var(--font-heading); font-size: 1rem;
+            margin-bottom: 0.8rem; outline: none;
+        }
+        .input-assign {
+            width: 100%; background: var(--bg-cream); color: var(--text-dark);
+            border: none; padding: 0.7rem 1rem; border-radius: 6px;
+            font-family: var(--font-heading); font-size: 1rem; outline: none;
+            margin-bottom: 0.5rem;
+        }
+        .input-assign::placeholder { color: var(--text-dark); opacity: 0.5; }
+        .assign-hint { font-family: var(--font-heading); font-size: 0.85rem; color: rgba(255,255,255,0.6); }
 
-        .btn-action { 
-            background: var(--bg-cream); 
-            color: var(--text-dark); 
-            border: none; 
-            padding: 0.6rem 2.5rem; 
-            font-size: 1.2rem; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-family: var(--font-heading); 
-            transition: transform 0.2s;
+        .action-buttons { display: flex; justify-content: space-between; margin-top: 2rem; align-items: center; }
+        .btn-action {
+            background: var(--bg-cream); color: var(--text-dark); border: none;
+            padding: 0.6rem 2.5rem; font-size: 1.2rem; border-radius: 4px;
+            cursor: pointer; font-family: var(--font-heading); transition: transform 0.2s;
         }
-        
-        .btn-action:hover { 
-            transform: scale(1.05); 
-        }
+        .btn-action:hover { transform: scale(1.05); }
+        .btn-action.primary { background: var(--sidebar-red); color: white; }
+        .btn-action.primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn-action.danger { background: #c0392b; color: white; }
+        .btn-action.danger:hover { opacity: 0.85; transform: none; }
 
-        .action-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 2rem;
-        }
+        #error-task { color: #ff6b6b; font-family: var(--font-heading); margin-top: 0.5rem; display: none; }
     </style>
 </head>
 <script src="../js/api.js"></script>
@@ -133,38 +69,142 @@
     <div class="corner-decoration"></div>
     <div class="auth-container">
         <div class="auth-card">
-            <input type="text" class="input-wide" placeholder="Task Name">
-            <textarea class="textarea-wide" placeholder="Task Description //(Max 1000 Characters)"></textarea>
-            
+            <h2 class="page-heading" id="page-heading">Buat Task Baru</h2>
+
+            <input type="text" class="input-wide" id="task-title" placeholder="Task Name">
+            <textarea class="textarea-wide" id="task-desc" placeholder="Task Description //(Max 1000 Characters)" maxlength="1000"></textarea>
+
             <div class="grid-2col">
                 <div>
-                    <p class="section-title" style="margin-top: 0;">Apply Member:</p>
-                    <button class="btn-gray">Add Member (User id)</button>
-                    <div class="member-list">
-                        
-                    </div>
+                    <p class="section-title" style="margin-top:0;">Status:</p>
+                    <select class="select-styled" id="task-status">
+                        <option value="todo">To Do</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="done">Done</option>
+                    </select>
 
-                    <p class="section-title">Add Attachment:</p>
-                    <button class="btn-gray">Add Attachment</button>
-                    <div class="file-list">
-                        
-                    </div>
+                    <p class="section-title">Priority:</p>
+                    <select class="select-styled" id="task-priority">
+                        <option value="medium">Medium</option>
+                        <option value="high">High 🔴</option>
+                        <option value="low">Low 🟢</option>
+                    </select>
+
+                    <p class="section-title">Deadline:</p>
+                    <input type="date" class="input-date" id="task-deadline">
                 </div>
-
                 <div>
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <p class="section-title" style="margin: 0;">Add Deadline:</p>
-                        <button class="btn-gray" style="margin:0; background: var(--bg-cream);">Calendar</button>
-                    </div>
-                    <button class="btn-gray" style="margin-top: 1rem;">Add Deadline (Date)</button>
+                    <p class="section-title" style="margin-top:0;">Assign Member (Email):</p>
+                    <input type="email" class="input-assign" id="task-assign-email" placeholder="Email member...">
+                    <p class="assign-hint">Kosongkan jika tidak di-assign.</p>
                 </div>
             </div>
 
+            <p id="error-task"></p>
+
             <div class="action-buttons">
-                <button class="btn-action" onclick="window.location.href='list-dashboard.html'">Cancel</button>
-                <button class="btn-action" onclick="window.location.href='list-dashboard.html'">Add</button>
+                <div style="display:flex; gap:0.8rem;">
+                    <button class="btn-action" id="btn-cancel">Cancel</button>
+                    <button class="btn-action danger" id="btn-delete" style="display:none;" onclick="deleteTask()">🗑 Hapus Task</button>
+                </div>
+                <button class="btn-action primary" id="btn-submit" onclick="submitTask()">Buat Task</button>
             </div>
         </div>
     </div>
+
+    <script>
+        requireAuth();
+
+        const params      = new URLSearchParams(window.location.search);
+        const workspaceId = params.get('workspaceId');
+        const listId      = params.get('listId');
+        const taskId      = params.get('taskId');
+        const isEditMode  = params.get('mode') === 'edit' && !!taskId;
+
+        if (!workspaceId || !listId) { window.location.href = 'dashboard.html'; }
+
+        function backToList() {
+            window.location.href = `list-dashboard.html?workspaceId=${workspaceId}&listId=${listId}`;
+        }
+
+        document.getElementById('btn-cancel').onclick = backToList;
+
+        // Setup mode
+        if (isEditMode) {
+            document.getElementById('page-heading').textContent  = 'Edit Task';
+            document.getElementById('btn-submit').textContent    = 'Simpan Perubahan';
+            document.getElementById('btn-delete').style.display  = 'inline-block';
+            loadExistingTask();
+        }
+
+        async function loadExistingTask() {
+            try {
+                const res  = await TaskAPI.getOne(listId, taskId);
+                const task = res.task || res.data || res;
+
+                document.getElementById('task-title').value  = task.title       || '';
+                document.getElementById('task-desc').value   = task.description || '';
+                document.getElementById('task-status').value = task.status       || 'todo';
+                document.getElementById('task-priority').value = task.priority   || 'medium';
+
+                if (task.due_date) {
+                    // Format YYYY-MM-DD untuk input[type=date]
+                    document.getElementById('task-deadline').value = task.due_date.split('T')[0];
+                }
+            } catch (err) {
+                document.getElementById('error-task').textContent = 'Gagal memuat task: ' + err.message;
+                document.getElementById('error-task').style.display = 'block';
+            }
+        }
+
+        async function submitTask() {
+            const title       = document.getElementById('task-title').value.trim();
+            const description = document.getElementById('task-desc').value.trim();
+            const status      = document.getElementById('task-status').value;
+            const priority    = document.getElementById('task-priority').value;
+            const due_date    = document.getElementById('task-deadline').value;
+
+            const btn   = document.getElementById('btn-submit');
+            const errEl = document.getElementById('error-task');
+
+            errEl.style.display = 'none';
+            if (!title) { errEl.textContent = 'Nama task wajib diisi.'; errEl.style.display = 'block'; return; }
+
+            btn.disabled    = true;
+            btn.textContent = isEditMode ? 'Menyimpan...' : 'Membuat...';
+
+            const taskData = {
+                title,
+                description: description || undefined,
+                status,
+                priority,
+                due_date: due_date || undefined,
+            };
+
+            try {
+                if (isEditMode) {
+                    await TaskAPI.update(listId, taskId, taskData);
+                } else {
+                    await TaskAPI.create(listId, taskData);
+                }
+                backToList();
+            } catch (err) {
+                errEl.textContent   = (isEditMode ? 'Gagal menyimpan: ' : 'Gagal membuat: ') + (err.message || 'Unknown error');
+                errEl.style.display = 'block';
+                btn.disabled        = false;
+                btn.textContent     = isEditMode ? 'Simpan Perubahan' : 'Buat Task';
+            }
+        }
+
+        async function deleteTask() {
+            if (!confirm('Hapus task ini?')) return;
+            try {
+                await TaskAPI.delete(listId, taskId);
+                backToList();
+            } catch (err) {
+                alert('Gagal menghapus task: ' + (err.message || 'Unknown error'));
+            }
+        }
+    </script>
 </body>
 </html>
