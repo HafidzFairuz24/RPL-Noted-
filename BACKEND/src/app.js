@@ -18,17 +18,8 @@ const allowedOrigins = [
 
 app.use(cors({
     origin: function (origin, callback) {
-        // Izinkan request tanpa origin (Postman, curl) atau yang ada di daftar
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            // Fallback: izinkan semua origin localhost/127 dengan port apapun
-            if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
-                callback(null, true);
-            } else {
-                callback(new Error('Not allowed by CORS: ' + origin));
-            }
-        }
+        // Izinkan semua origin untuk mempermudah koneksi dari Vercel/Localhost
+        callback(null, true);
     },
     credentials: true,
 }));
