@@ -76,6 +76,16 @@
         .btn-action.danger:hover { opacity: 0.85; transform: none; }
 
         #error-task { color: #ff6b6b; font-family: var(--font-heading); margin-top: 0.5rem; display: none; }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .grid-2col { grid-template-columns: 1fr; gap: 1rem; }
+            .img-upload-row { flex-direction: column; align-items: flex-start; }
+            .action-buttons { flex-direction: column-reverse; gap: 1rem; }
+            .action-buttons > div { flex-direction: column; width: 100%; gap: 0.5rem; display: flex; }
+            .btn-action { width: 100%; justify-content: center; font-size: 1rem; padding: 0.8rem; }
+            .btn-upload-img { width: 100%; }
+        }
     </style>
 </head>
 <script src="../js/api.js"></script>
