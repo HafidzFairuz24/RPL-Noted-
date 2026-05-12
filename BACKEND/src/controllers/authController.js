@@ -136,4 +136,22 @@ const updateProfile = async (req, res) => {
     }
 };
 
-module.exports = { register, login, getMe, updateProfile };
+// ── GET /api/auth/users/:userId ───────────────────────────────────────────────
+const getUser = async (req, res) => {
+    try {
+        const [rows] = await db.execute(
+            'SELECT id, username, email, created_at FROM users WHERE id = ?',
+            [req.params.userId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'User not found.' });
+        }
+
+        res.json({ success: true, user: rows[0] });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Server error.' });
+    }
+};
+
+module.exports = { register, login, getMe, updateProfile, getUser };

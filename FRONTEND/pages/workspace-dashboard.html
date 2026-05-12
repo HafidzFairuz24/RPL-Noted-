@@ -66,6 +66,9 @@
     <aside class="sidebar">
         <h1 class="logo">Noted!</h1>
         <nav class="nav-menu">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <img id="sidebar-avatar" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3); display: none; margin: 0 auto 0.5rem auto;">
+            </div>
             <a href="dashboard.html" class="nav-btn active">Main Dashboard</a>
             <a href="profile.html" class="nav-btn">Profile</a>
             <a href="notification.html" class="nav-btn">Notification</a>
@@ -105,6 +108,19 @@
         const workspaceId = params.get('workspaceId');
 
         if (!workspaceId) { window.location.href = 'dashboard.html'; }
+
+        const currentUser = Auth.getUser();
+        if (currentUser) {
+            const savedAvatar = localStorage.getItem('noted_avatar');
+            const avatarEl = document.getElementById('sidebar-avatar');
+            if (savedAvatar) {
+                avatarEl.src = savedAvatar;
+                avatarEl.style.display = 'block';
+            } else {
+                avatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.username || 'User')}&background=random`;
+                avatarEl.style.display = 'block';
+            }
+        }
 
         // Tombol edit workspace → ke workspace-setting dengan mode edit
         document.getElementById('btn-edit-ws').onclick = function() {

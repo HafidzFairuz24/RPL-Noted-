@@ -37,6 +37,7 @@ const AuthAPI = {
     register: (data) => post('/auth/register', data),
     login:    (data) => post('/auth/login',    data),
     me:       ()     => get('/auth/me'),
+    getUser:  (id)   => get(`/auth/users/${id}`),
     updateProfile: (data) => put('/auth/profile', data),
 };
 

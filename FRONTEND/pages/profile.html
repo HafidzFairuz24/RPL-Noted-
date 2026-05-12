@@ -180,13 +180,13 @@
             reader.readAsDataURL(file);
         }
 
-        function renderAvatar(base64OrInitial) {
+        function renderAvatar(base64OrUrlOrInitial) {
             const el = document.getElementById('profile-avatar');
-            if (base64OrInitial && base64OrInitial.startsWith('data:')) {
-                el.innerHTML = `<img src="${base64OrInitial}" alt="avatar">`;
+            if (base64OrUrlOrInitial && (base64OrUrlOrInitial.startsWith('data:') || base64OrUrlOrInitial.startsWith('http'))) {
+                el.innerHTML = `<img src="${base64OrUrlOrInitial}" alt="avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
             } else {
                 el.innerHTML = '';
-                el.textContent = base64OrInitial || '?';
+                el.textContent = base64OrUrlOrInitial || '?';
             }
         }
 
@@ -243,25 +243,48 @@
             btn.textContent = 'Simpan';
         }
 
+        const params = new URLSearchParams(window.location.search);
+        const targetUserId = params.get('userId');
+        const currentUser = Auth.getUser();
+        const isMyProfile = !targetUserId || (currentUser && currentUser.id == targetUserId);
+
         // ── Load profile ───────────────────────────────────────────────
         async function loadProfile() {
             try {
-                const res  = await AuthAPI.me();
-                const user = res.user || res.data || res;
-                Auth.setUser(user);
-                renderProfile(user);
-            } catch (_) {
-                // Fallback localStorage
-                const localUser = Auth.getUser();
-                if (localUser) renderProfile(localUser);
-                else {
-                    document.getElementById('error-profile').textContent = 'Gagal memuat profil.';
-                    document.getElementById('error-profile').style.display = 'block';
+                if (isMyProfile) {
+                    const res  = await AuthAPI.me();
+                    const user = res.user || res.data || res;
+                    Auth.setUser(user);
+                    renderProfile(user, true);
+                } else {
+                    const res = await AuthAPI.getUser(targetUserId);
+                    const user = res.user || res.data || res;
+                    
+                    // Sembunyikan fitur edit jika bukan profil sendiri
+                    document.querySelector('.profile-edit-section').style.display = 'none';
+                    document.getElementById('profile-password').parentElement.style.display = 'none';
+                    document.querySelector('.btn-upload-avatar').style.display = 'none';
+                    
+                    renderProfile(user, false);
+                }
+            } catch (err) {
+                if (isMyProfile) {
+                    const localUser = Auth.getUser();
+                    if (localUser) renderProfile(localUser, true);
+                    else showError('Gagal memuat profil.');
+                } else {
+                    showError('Gagal memuat profil user.');
                 }
             }
         }
 
-        function renderProfile(user) {
+        function showError(msg) {
+            const el = document.getElementById('error-profile');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        function renderProfile(user, isMyProfile) {
             const username  = user.username || user.name || 'User';
             const email     = user.email    || '-';
             const createdAt = user.createdAt || user.created_at || null;
@@ -286,15 +309,22 @@
                 document.getElementById('profile-created-at').textContent = 'Tidak diketahui';
             }
 
-            // Avatar: cek localStorage dulu
-            const savedAvatar = localStorage.getItem(AVATAR_KEY);
+            // Avatar: cek localStorage jika isMyProfile, jika tidak gunakan ui-avatars
+            let savedAvatar = null;
+            if (isMyProfile) {
+                savedAvatar = localStorage.getItem(AVATAR_KEY);
+            }
+            
             if (savedAvatar) {
                 renderAvatar(savedAvatar);
             } else {
-                renderAvatar(username.charAt(0).toUpperCase());
+                const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=random`;
+                renderAvatar(avatarUrl);
             }
 
-            updateCooldownUI();
+            if (isMyProfile) {
+                updateCooldownUI();
+            }
         }
 
         function showSuccess(msg) {
