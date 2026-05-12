@@ -147,17 +147,19 @@ body {
         height: auto;
         min-height: 100vh;
         padding: 1rem 0;
+        align-items: flex-start; /* Start from top on mobile */
     }
 
     .auth-card {
-        padding: 2rem 1rem;
+        padding: 2rem 1.5rem;
         height: auto;
-        max-width: 100%;
+        max-width: 92%;
+        margin: 2rem auto;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
-        border-radius: 0;
-        box-shadow: none;
+        border-radius: 12px; /* Restore border radius */
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15); /* Restore shadow */
     }
     
     .auth-card h2 {

@@ -14,6 +14,11 @@
         .img-box:nth-child(1) { transform: translateY(-30px); }
         .img-box:nth-child(2) { grid-row: span 2; height: 300px; transform: translateY(30px); }
         .img-box:nth-child(3) { transform: translateY(-10px); }
+        
+        @media (max-width: 768px) {
+            .signup-wrapper { flex-direction: column; padding: 1rem; gap: 1rem; }
+            .image-grid { display: none; } /* Hide decorative images on small screens to focus on the form */
+        }
     </style>
 </head>
 <script src="../js/api.js"></script>
