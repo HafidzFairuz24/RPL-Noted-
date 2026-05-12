@@ -26,3 +26,12 @@ body, html { height: 100%; font-family: var(--font-body); overflow: hidden; }
 
 @keyframes slideRight { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
 .animate-slide-right { opacity: 0; animation: slideRight 1s ease-out 0.2s forwards; }
+
+@media (max-width: 768px) {
+    .landing-container { flex-direction: column; position: relative; }
+    .landing-content { flex: 1; width: 100%; padding: 2rem; justify-content: center; text-align: center; background: rgba(249, 236, 228, 0.85); z-index: 2; align-items: center; }
+    .action-group { align-items: center; width: 100%; }
+    .brand-title { font-size: 4rem; }
+    .brand-subtitle { font-size: 1.2rem; }
+    .btn-signup { width: 100%; text-align: center; }
+}

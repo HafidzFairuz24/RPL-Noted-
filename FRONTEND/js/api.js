@@ -113,6 +113,14 @@ async function checkUnreadNotifications() {
     }
 }
 
+// ── Mobile Sidebar Toggle ───────────────────────────────────────
+window.toggleSidebar = function() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.sidebar-overlay');
+    if (sidebar) sidebar.classList.toggle('open');
+    if (overlay) overlay.classList.toggle('active');
+};
+
 // ── Show API error in UI ──────────────────────────────────────
 function showError(message, containerId = 'error-msg') {
     const el = document.getElementById(containerId);
