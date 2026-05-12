@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noted! - Sign Up</title>
+    <link rel="stylesheet" href="../css/auth.css">
+    <style>
+        .signup-wrapper { display: flex; width: 100%; max-width: 1000px; gap: 3rem; align-items: center; z-index: 2; margin: 0 auto; padding: 2rem; }
+        .auth-card { flex: 1; }
+        .image-grid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; position: relative; }
+        .img-box { background-color: var(--sidebar-red); border-radius: 12px; overflow: hidden; height: 200px; }
+        .img-box img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
+        .img-box:nth-child(1) { transform: translateY(-30px); }
+        .img-box:nth-child(2) { grid-row: span 2; height: 300px; transform: translateY(30px); }
+        .img-box:nth-child(3) { transform: translateY(-10px); }
+    </style>
+</head>
+<script src="../js/api.js"></script>
+<body>
+    <div class="corner-decoration"></div>
+    <div class="auth-container">
+        <div class="signup-wrapper">
+            <div class="auth-card">
+                <h2>Welcome!</h2>
+                <div class="form-group-wrapper">
+                    <form id="signup-form">
+                        <div class="input-group"><label for="reg-username">Username</label><input type="text" id="reg-username" required></div>
+                        <div class="input-group"><label for="reg-email">Email</label><input type="email" id="reg-email" required></div>
+                        <div class="input-group"><label for="reg-password">Password</label><input type="password" id="reg-password" required></div>
+                        <div class="input-group"><label for="reg-confirm">Confirm Password</label><input type="password" id="reg-confirm" required></div>
+                        <p id="error-msg" style="color:#ff6b6b; display:none; margin-top:0.5rem;"></p>
+                    </form>
+                </div>
+                <button type="button" class="auth-btn" id="signup-btn" onclick="handleSignup()">Sign Up</button><br>
+                <a href="login.html" class="auth-link">Already have an account? Click here!</a>
+            </div>
+
+            <div class="image-grid">
+                <div class="img-box"><img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085" alt="setup 1"></div>
+                <div class="img-box"><img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d" alt="setup 2"></div>
+                <div class="img-box"><img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c" alt="setup 3"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Jika sudah login, langsung ke dashboard
+        if (Auth.isLoggedIn()) {
+            window.location.href = 'dashboard.html';
+        }
+
+        async function handleSignup() {
+            const username = document.getElementById('reg-username').value.trim();
+            const email    = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value.trim();
+            const confirm  = document.getElementById('reg-confirm').value.trim();
+            const btn      = document.getElementById('signup-btn');
+            const errMsg   = document.getElementById('error-msg');
+
+            errMsg.style.display = 'none';
+
+            if (!username || !email || !password || !confirm) {
+                errMsg.textContent = 'Semua field wajib diisi.';
+                errMsg.style.display = 'block';
+                return;
+            }
+            if (password !== confirm) {
+                errMsg.textContent = 'Password dan Confirm Password tidak cocok.';
+                errMsg.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Loading...';
+
+            try {
+                const res = await AuthAPI.register({ username, email, password });
+                // Simpan token & user lalu masuk dashboard
+                Auth.setToken(res.token);
+                Auth.setUser(res.user);
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                errMsg.textContent = err.message || 'Registrasi gagal. Coba lagi.';
+                errMsg.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Sign Up';
+            }
+        }
+
+        document.getElementById('signup-form').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') handleSignup();
+        });
+    </script>
+</body>
+</html>

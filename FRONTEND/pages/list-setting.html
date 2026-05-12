@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Noted! - List Setting</title>
+    <link rel="stylesheet" href="../css/auth.css">
+    <style>
+        .auth-card { max-width: 900px; text-align: left; padding: 2rem; }
+        
+        .input-wide { 
+            width: 100%; 
+            background: var(--bg-cream); 
+            color: var(--text-dark); 
+            border: none; 
+            padding: 1rem; 
+            border-radius: 6px; 
+            font-family: var(--font-heading); 
+            font-size: 1.2rem; 
+            margin-bottom: 1rem; 
+        }
+        
+        
+        .textarea-wide { 
+            width: 100%; 
+            background: var(--bg-cream); 
+            color: var(--text-dark); 
+            border: none; 
+            padding: 2rem; 
+            border-radius: 6px; 
+            font-family: var(--font-heading); 
+            font-size: 1.2rem; 
+            min-height: 200px; 
+            margin-bottom: 1.5rem; 
+            resize: none; 
+            text-align: center; 
+        }
+
+        /* Membuat teks placeholder (petunjuk) menjadi transparan/samar */
+        .input-wide::placeholder, .textarea-wide::placeholder {
+            color: var(--text-dark);
+            opacity: 0.5; /* Opacity diperkecil */
+        }
+
+        .member-section { margin-top: 1rem; font-family: var(--font-heading); font-size: 1.2rem; }
+        .member-btn { 
+            background: var(--card-gray); 
+            color: var(--text-dark); 
+            border: none; 
+            padding: 0.5rem 1rem; 
+            border-radius: 4px; 
+            margin-top: 0.5rem; 
+            cursor: pointer; 
+            font-family: var(--font-heading); 
+            transition: 0.2s; 
+        }
+        .member-btn:hover { background: #d0d0d0; }
+        
+        /* Container member dikosongkan secara default */
+        .member-list { 
+            background: var(--card-gray); 
+            color: var(--text-dark); 
+            padding: 1rem; 
+            border-radius: 6px; 
+            margin-top: 0.5rem; 
+            min-height: 100px; 
+            max-width: 450px; 
+            font-family: var(--font-heading); 
+            display: flex; 
+            flex-direction: column; 
+            gap: 0.5rem;
+        }
+
+        .action-buttons { display: flex; justify-content: space-between; margin-top: 2rem; }
+        .btn-action { 
+            background: var(--bg-cream); 
+            color: var(--text-dark); 
+            border: none; 
+            padding: 0.6rem 2.5rem; 
+            font-size: 1.2rem; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-family: var(--font-heading); 
+            transition: transform 0.2s; 
+        }
+        .btn-action:hover { transform: scale(1.05); }
+    </style>
+</head>
+<script src="../js/api.js"></script>
+<body>
+    <div class="corner-decoration"></div>
+    <div class="auth-container">
+        <div class="auth-card">
+            <input type="text" class="input-wide" placeholder="List Name">
+            
+            <textarea class="textarea-wide" placeholder="List Description //(Max 500 Characters)"></textarea>
+            
+            <div class="member-section">
+                <p>Apply Member :</p>
+                <button class="member-btn">Add Member (User id)</button>
+                <div class="member-list"></div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn-action" onclick="window.location.href='workspace-dashboard.html'">Cancel</button>
+                <button class="btn-action" onclick="window.location.href='workspace-dashboard.html'">Add</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
