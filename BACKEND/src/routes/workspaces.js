@@ -5,7 +5,7 @@ const { isMember, isOwner } = require('../middleware/workspace');
 const {
     getMyWorkspaces, getWorkspace,
     createWorkspace, updateWorkspace, deleteWorkspace,
-    addMember, removeMember,
+    addMember, removeMember, updateMemberRole
 } = require('../controllers/workspaceController');
 
 router.get('/',                                       auth,           getMyWorkspaces);
@@ -17,5 +17,6 @@ router.delete('/:workspaceId',                        auth, isOwner,  deleteWork
 // Members
 router.post('/:workspaceId/members',                  auth, isOwner,  addMember);
 router.delete('/:workspaceId/members/:userId',        auth, isOwner,  removeMember);
+router.put('/:workspaceId/members/:userId',           auth, isOwner,  updateMemberRole);
 
 module.exports = router;

@@ -46,7 +46,7 @@ const getWorkspace = async (req, res) => {
 
 // ── POST /api/workspaces ──────────────────────────────────────────────────────
 const createWorkspace = async (req, res) => {
-    const { name, description } = req.body;
+    const { name, description, background_image } = req.body;
     if (!name) return res.status(400).json({ success: false, message: 'Workspace name is required.' });
 
     const conn = await db.getConnection();
@@ -54,8 +54,8 @@ const createWorkspace = async (req, res) => {
         await conn.beginTransaction();
 
         const [result] = await conn.execute(
-            'INSERT INTO workspaces (name, description, owner_id) VALUES (?, ?, ?)',
-            [name, description || null, req.user.id]
+            'INSERT INTO workspaces (name, description, background_image, owner_id) VALUES (?, ?, ?, ?)',
+            [name, description || null, background_image || null, req.user.id]
         );
         const workspaceId = result.insertId;
 
@@ -77,12 +77,21 @@ const createWorkspace = async (req, res) => {
 
 // ── PUT /api/workspaces/:workspaceId ──────────────────────────────────────────
 const updateWorkspace = async (req, res) => {
-    const { name, description } = req.body;
+    const { name, description, background_image } = req.body;
     try {
-        await db.execute(
-            'UPDATE workspaces SET name = COALESCE(?, name), description = COALESCE(?, description) WHERE id = ?',
-            [name || null, description || null, req.params.workspaceId]
-        );
+        const fields = [];
+        const values = [];
+        if (name !== undefined) { fields.push('name = ?'); values.push(name); }
+        if (description !== undefined) { fields.push('description = ?'); values.push(description); }
+        if (background_image !== undefined) { fields.push('background_image = ?'); values.push(background_image); }
+        
+        if (fields.length > 0) {
+            values.push(req.params.workspaceId);
+            await db.execute(
+                `UPDATE workspaces SET ${fields.join(', ')} WHERE id = ?`,
+                values
+            );
+        }
         res.json({ success: true, message: 'Workspace updated.' });
     } catch (err) {
         res.status(500).json({ success: false, message: 'Server error.' });
@@ -152,4 +161,31 @@ const removeMember = async (req, res) => {
     }
 };
 
-module.exports = { getMyWorkspaces, getWorkspace, createWorkspace, updateWorkspace, deleteWorkspace, addMember, removeMember };
+// ── PUT /api/workspaces/:workspaceId/members/:userId ────────────────────────
+const updateMemberRole = async (req, res) => {
+    const { userId } = req.params;
+    const { role } = req.body;
+
+    if (!['owner', 'manager', 'member'].includes(role)) {
+        return res.status(400).json({ success: false, message: 'Invalid role.' });
+    }
+
+    if (parseInt(userId) === req.user.id) {
+        return res.status(400).json({ success: false, message: 'Owner cannot change their own role here.' });
+    }
+
+    try {
+        const [result] = await db.execute(
+            'UPDATE workspace_members SET role = ? WHERE workspace_id = ? AND user_id = ?',
+            [role, req.params.workspaceId, userId]
+        );
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: 'Member not found.' });
+        }
+        res.json({ success: true, message: 'Member role updated.' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Server error.' });
+    }
+};
+
+module.exports = { getMyWorkspaces, getWorkspace, createWorkspace, updateWorkspace, deleteWorkspace, addMember, removeMember, updateMemberRole };
