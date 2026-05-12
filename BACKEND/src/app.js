@@ -61,6 +61,14 @@ app.get('/api/health', (req, res) => {
     res.json({ success: true, message: 'Noted! API is running 🚀', timestamp: new Date() });
 });
 
+// ── Root route ────────────────────────────────────────────────────────────────
+app.get("/", (req, res) => {
+    res.json({
+        success: true,
+        message: "RPL Noted Backend Running 🚀"
+    });
+});
+
 // ── 404 handler ───────────────────────────────────────────────────────────────
 app.use((req, res) => {
     res.status(404).json({ success: false, message: `Route ${req.method} ${req.path} not found.` });
