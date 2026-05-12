@@ -13,7 +13,7 @@ const Auth = {
     setToken: (token)  => localStorage.setItem('noted_token', token),
     getUser:  ()       => JSON.parse(localStorage.getItem('noted_user') || 'null'),
     setUser:  (user)   => localStorage.setItem('noted_user', JSON.stringify(user)),
-    logout:   ()       => { localStorage.removeItem('noted_token'); localStorage.removeItem('noted_user'); window.location.href = '/pages/login.html'; },
+    logout:   ()       => { localStorage.removeItem('noted_token'); localStorage.removeItem('noted_user'); window.location.href = 'login.html'; },
     isLoggedIn: ()     => !!localStorage.getItem('noted_token'),
 };
 
@@ -93,7 +93,7 @@ const NotificationAPI = {
 // ── Guard: redirect to login if not authenticated ─────────────
 function requireAuth() {
     if (!Auth.isLoggedIn()) {
-        window.location.href = '/pages/login.html';
+        window.location.href = 'login.html';
     }
 }
 
