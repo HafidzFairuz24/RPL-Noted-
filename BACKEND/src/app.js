@@ -5,8 +5,31 @@ const cors    = require('cors');
 const app = express();
 
 // ── Middleware ────────────────────────────────────────────────────────────────
+// Izinkan semua origin dari localhost / 127.0.0.1 (untuk dev)
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    'http://localhost:5500',
+    'http://127.0.0.1:5500',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:8080',
+    'http://127.0.0.1:8080',
+].filter(Boolean);
+
 app.use(cors({
-    origin:      process.env.FRONTEND_URL || '*',
+    origin: function (origin, callback) {
+        // Izinkan request tanpa origin (Postman, curl) atau yang ada di daftar
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            // Fallback: izinkan semua origin localhost/127 dengan port apapun
+            if (/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS: ' + origin));
+            }
+        }
+    },
     credentials: true,
 }));
 app.use(express.json());
