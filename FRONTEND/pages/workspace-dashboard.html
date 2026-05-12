@@ -126,11 +126,10 @@
                 document.getElementById('ws-desc').textContent  = ws.description || '';
                 document.getElementById('ws-owner').textContent = `Owned By: ${ws.owner_name || 'Unknown'}`;
 
-                // Background image dari localStorage
-                const savedImg = localStorage.getItem(`noted_ws_img_${workspaceId}`);
-                if (savedImg) {
+                // Background image dari database
+                if (ws.background_image) {
                     const imgEl = document.getElementById('ws-bg-img');
-                    imgEl.src           = savedImg;
+                    imgEl.src           = ws.background_image;
                     imgEl.style.display = 'block';
                 }
 

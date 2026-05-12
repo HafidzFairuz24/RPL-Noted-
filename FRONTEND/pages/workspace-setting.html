@@ -68,9 +68,14 @@
         }
         .member-row {
             display: flex; justify-content: space-between; align-items: center;
-            background: white; padding: 0.5rem 1rem; border-radius: 4px;
+            background: white; padding: 0.5rem 1rem; border-radius: 4px; gap: 1rem;
         }
-        .member-name { font-size: 1rem; }
+        .member-info { flex: 1; font-size: 1rem; display: flex; flex-direction: column; }
+        .member-email { font-size: 0.85rem; opacity: 0.7; }
+        .role-select {
+            padding: 0.3rem; border-radius: 4px; font-family: var(--font-heading);
+            background: var(--bg-cream); border: 1px solid #ccc;
+        }
         .member-remove { background: none; border: none; color: #c0392b; cursor: pointer; font-size: 1rem; }
         .member-empty { opacity: 0.5; font-size: 0.95rem; text-align: center; padding: 0.5rem; }
 
@@ -83,6 +88,7 @@
         .btn-action:hover { transform: scale(1.05); }
         .btn-action.primary { background: var(--sidebar-red); color: white; }
         .btn-action.primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn-action.danger { background: #c0392b; color: white; }
 
         #error-ws { color: #ff6b6b; font-family: var(--font-heading); margin-top: 0.5rem; display: none; }
     </style>
@@ -104,7 +110,7 @@
                     <button class="btn-upload-img" type="button" onclick="document.getElementById('img-file-input').click()">Pilih Gambar</button>
                     <input type="file" id="img-file-input" accept="image/*" onchange="handleImgUpload(event)">
                     <img id="img-preview" class="img-preview" alt="preview">
-                    <button class="btn-remove-img" id="btn-remove-img" type="button" onclick="removeImg()">✕ Hapus</button>
+                    <button class="btn-remove-img" id="btn-remove-img" type="button" onclick="removeImg()">✕ Hapus Gambar</button>
                 </div>
             </div>
 
@@ -113,7 +119,7 @@
                 <p>Apply Member :</p>
                 <div class="add-member-row">
                     <input type="text" class="input-member" id="member-email-input" placeholder="Masukkan email member">
-                    <button class="btn-add-member" onclick="addMemberToList()">+ Add Member</button>
+                    <button class="btn-add-member" onclick="handleAddMemberClick()">+ Add Member</button>
                 </div>
                 <div class="member-list" id="member-list">
                     <p class="member-empty" id="member-empty-msg">Belum ada member ditambahkan.</p>
@@ -123,7 +129,10 @@
             <p id="error-ws"></p>
 
             <div class="action-buttons">
-                <button class="btn-action" id="btn-cancel">Cancel</button>
+                <div style="display:flex; gap:0.8rem;">
+                    <button class="btn-action" id="btn-cancel">Cancel</button>
+                    <button class="btn-action danger" id="btn-delete" style="display:none;" onclick="deleteWorkspace()">🗑 Hapus Workspace</button>
+                </div>
                 <button class="btn-action primary" id="btn-submit" onclick="submitWorkspace()">Buat Workspace</button>
             </div>
         </div>
@@ -135,9 +144,10 @@
         const params      = new URLSearchParams(window.location.search);
         const workspaceId = params.get('workspaceId');   // ada = edit mode
         const isEditMode  = !!workspaceId;
+        const currentUser = Auth.getUser();
 
-        const memberList    = [];
-        let   selectedImage = null;  // base64 string
+        let memberListArray = []; // dipakai saat create mode
+        let selectedImage   = null;  // base64 string
 
         // ── Cancel button ─────────────────────────────────────────────
         document.getElementById('btn-cancel').onclick = function() {
@@ -152,6 +162,7 @@
         if (isEditMode) {
             document.getElementById('page-heading').textContent = 'Edit Workspace';
             document.getElementById('btn-submit').textContent   = 'Simpan Perubahan';
+            document.getElementById('btn-delete').style.display = 'inline-block';
             loadExistingWorkspace();
         }
 
@@ -164,11 +175,15 @@
                 document.getElementById('ws-name').value = ws.name  || '';
                 document.getElementById('ws-desc').value = ws.description || '';
 
-                // Load gambar dari localStorage
-                const savedImg = localStorage.getItem(`noted_ws_img_${workspaceId}`);
-                if (savedImg) {
-                    selectedImage = savedImg;
-                    showPreview(savedImg);
+                // Load gambar dari database (background_image)
+                if (ws.background_image) {
+                    selectedImage = ws.background_image;
+                    showPreview(ws.background_image);
+                }
+
+                // Render list member dari backend
+                if (ws.members) {
+                    renderMembersFromBackend(ws.members);
                 }
             } catch (err) {
                 document.getElementById('error-ws').textContent = 'Gagal memuat data: ' + err.message;
@@ -197,41 +212,136 @@
         }
 
         function removeImg() {
-            selectedImage = null;
+            selectedImage = null; // null menandakan gambar dihapus
             document.getElementById('img-preview').style.display = 'none';
             document.getElementById('btn-remove-img').style.display = 'none';
             document.getElementById('img-file-input').value = '';
-            if (isEditMode) localStorage.removeItem(`noted_ws_img_${workspaceId}`);
         }
 
         // ── Member list UI ────────────────────────────────────────────
-        function addMemberToList() {
+        async function handleAddMemberClick() {
             const input = document.getElementById('member-email-input');
-            const value = input.value.trim();
-            if (!value) { alert('Masukkan email member.'); return; }
-            if (memberList.includes(value)) { alert('Member sudah ditambahkan.'); return; }
-            memberList.push(value);
-            input.value = '';
-            renderMemberList();
+            const email = input.value.trim();
+            if (!email) { alert('Masukkan email member.'); return; }
+
+            if (isEditMode) {
+                // Tambah member langsung ke backend
+                try {
+                    await WorkspaceAPI.addMember(workspaceId, email);
+                    input.value = '';
+                    await loadExistingWorkspace(); // reload list
+                } catch (err) {
+                    alert('Gagal menambah member: ' + (err.message || 'Error'));
+                }
+            } else {
+                // Create mode: simpan di array sementara
+                if (memberListArray.includes(email)) { alert('Member sudah ditambahkan.'); return; }
+                memberListArray.push(email);
+                input.value = '';
+                renderOfflineMemberList();
+            }
         }
 
         document.getElementById('member-email-input').addEventListener('keydown', e => {
-            if (e.key === 'Enter') addMemberToList();
+            if (e.key === 'Enter') handleAddMemberClick();
         });
 
-        function removeMember(index) { memberList.splice(index, 1); renderMemberList(); }
+        // Hapus member
+        async function handleRemoveMember(indexOrId) {
+            if (isEditMode) {
+                if (!confirm('Hapus member ini dari workspace?')) return;
+                try {
+                    await WorkspaceAPI.removeMember(workspaceId, indexOrId);
+                    await loadExistingWorkspace(); // reload list
+                } catch (err) { alert('Gagal menghapus member: ' + (err.message || 'Error')); }
+            } else {
+                memberListArray.splice(indexOrId, 1);
+                renderOfflineMemberList();
+            }
+        }
 
-        function renderMemberList() {
+        // Ubah role member (hanya edit mode)
+        async function handleChangeRole(userId, newRole) {
+            try {
+                await WorkspaceAPI.updateMember(workspaceId, userId, newRole);
+                // Berhasil update, no need reload
+            } catch (err) {
+                alert('Gagal mengubah role: ' + (err.message || 'Error'));
+                loadExistingWorkspace(); // reload to revert dropdown
+            }
+        }
+
+        function renderOfflineMemberList() {
             const listEl   = document.getElementById('member-list');
             const emptyMsg = document.getElementById('member-empty-msg');
             listEl.querySelectorAll('.member-row').forEach(el => el.remove());
-            emptyMsg.style.display = memberList.length === 0 ? 'block' : 'none';
-            memberList.forEach((m, i) => {
+            emptyMsg.style.display = memberListArray.length === 0 ? 'block' : 'none';
+            
+            memberListArray.forEach((email, i) => {
                 const row = document.createElement('div');
                 row.className = 'member-row';
-                row.innerHTML = `<span class="member-name">${m}</span><button class="member-remove" onclick="removeMember(${i})">✕</button>`;
+                row.innerHTML = `
+                    <div class="member-info"><span class="member-name">${email}</span></div>
+                    <button class="member-remove" onclick="handleRemoveMember(${i})">✕</button>
+                `;
                 listEl.appendChild(row);
             });
+        }
+
+        function renderMembersFromBackend(members) {
+            const listEl   = document.getElementById('member-list');
+            const emptyMsg = document.getElementById('member-empty-msg');
+            listEl.querySelectorAll('.member-row').forEach(el => el.remove());
+            emptyMsg.style.display = members.length === 0 ? 'block' : 'none';
+
+            members.forEach(m => {
+                const row = document.createElement('div');
+                row.className = 'member-row';
+                
+                const isMe = currentUser && currentUser.id === m.id;
+                const isOwner = m.role === 'owner';
+
+                // Dropdown role (Owner tidak bisa diubah rolenya lewat UI sini, dan kita gak bisa ubah role diri sendiri di sini)
+                let roleSelectHtml = '';
+                if (!isOwner && !isMe) {
+                    const isManager = m.role === 'manager';
+                    roleSelectHtml = `
+                        <select class="role-select" onchange="handleChangeRole(${m.id}, this.value)">
+                            <option value="member" ${!isManager ? 'selected' : ''}>Member</option>
+                            <option value="manager" ${isManager ? 'selected' : ''}>Project Manager</option>
+                        </select>
+                    `;
+                } else if (isOwner) {
+                    roleSelectHtml = `<span style="font-size:0.85rem; opacity:0.7;">Owner</span>`;
+                }
+
+                // Tombol hapus
+                let removeBtnHtml = '';
+                if (!isOwner && !isMe) {
+                    removeBtnHtml = `<button class="member-remove" onclick="handleRemoveMember(${m.id})">✕</button>`;
+                }
+
+                row.innerHTML = `
+                    <div class="member-info">
+                        <span class="member-name">${m.username || 'User'}</span>
+                        <span class="member-email">${m.email}</span>
+                    </div>
+                    ${roleSelectHtml}
+                    ${removeBtnHtml}
+                `;
+                listEl.appendChild(row);
+            });
+        }
+
+        // ── Delete Workspace ──────────────────────────────────────────
+        async function deleteWorkspace() {
+            if (!confirm('HAPUS PERMANEN Workspace ini? Semua List dan Task akan hilang.')) return;
+            try {
+                await WorkspaceAPI.delete(workspaceId);
+                window.location.href = 'dashboard.html';
+            } catch (err) {
+                alert('Gagal menghapus workspace: ' + (err.message || 'Error'));
+            }
         }
 
         // ── Submit (create atau edit) ─────────────────────────────────
@@ -247,31 +357,26 @@
             btn.disabled = true;
             btn.textContent = isEditMode ? 'Menyimpan...' : 'Membuat...';
 
+            const payload = { 
+                name, 
+                description: desc,
+                background_image: selectedImage // string base64 atau null jika dihapus
+            };
+
             try {
                 let targetId = workspaceId;
 
                 if (isEditMode) {
-                    // UPDATE
-                    await WorkspaceAPI.update(workspaceId, { name, description: desc });
+                    await WorkspaceAPI.update(workspaceId, payload);
                 } else {
-                    // CREATE
-                    const res = await WorkspaceAPI.create({ name, description: desc });
+                    const res = await WorkspaceAPI.create(payload);
                     targetId  = res.workspaceId || res.workspace?.id || res.id;
-
-                    // Tambahkan member
-                    for (const email of memberList) {
+                    // Tambahkan member yg di-list saat create
+                    for (const email of memberListArray) {
                         try { await WorkspaceAPI.addMember(targetId, email); } catch (_) {}
                     }
                 }
 
-                // Simpan gambar background ke localStorage (keyed by workspaceId)
-                if (selectedImage) {
-                    localStorage.setItem(`noted_ws_img_${targetId}`, selectedImage);
-                } else if (isEditMode) {
-                    localStorage.removeItem(`noted_ws_img_${targetId}`);
-                }
-
-                // Redirect ke workspace dashboard
                 window.location.href = isEditMode
                     ? `workspace-dashboard.html?workspaceId=${targetId}`
                     : 'dashboard.html';

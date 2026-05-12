@@ -49,6 +49,7 @@ const WorkspaceAPI = {
     delete:        (id)         => del(`/workspaces/${id}`),
     addMember:     (id, email)  => post(`/workspaces/${id}/members`, { email }),
     removeMember:  (id, userId) => del(`/workspaces/${id}/members/${userId}`),
+    updateMember:  (id, userId, role) => put(`/workspaces/${id}/members/${userId}`, { role }),
 };
 
 // ── List API ──────────────────────────────────────────────────
