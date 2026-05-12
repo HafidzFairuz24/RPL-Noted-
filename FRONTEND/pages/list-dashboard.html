@@ -50,6 +50,14 @@
         #error-list { color: #c0392b; font-family: var(--font-heading); padding: 1rem; display: none; }
 
         .task-bar.done { text-decoration: line-through; opacity: 0.5; }
+
+        @media (max-width: 768px) {
+            .list-header-banner { padding: 1.5rem; text-align: center; }
+            .btn-edit-list-header { position: relative; top: 0; right: 0; width: 100%; margin-top: 1rem; display: block; }
+            .task-bar { padding: 1rem; font-size: 1.2rem; flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .btn-edit-task-item { margin-left: 0; width: 100%; padding: 0.5rem; }
+            .btn-back-cream { width: 100%; padding: 0.8rem; }
+        }
     </style>
 </head>
 <script src="../js/api.js"></script>

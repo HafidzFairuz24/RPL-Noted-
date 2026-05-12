@@ -75,10 +75,11 @@
         .btn-action.danger { background: #c0392b; color: white; }
         .btn-action.danger:hover { opacity: 0.85; transform: none; }
 
-        #error-task { color: #ff6b6b; font-family: var(--font-heading); margin-top: 0.5rem; display: none; }
+        #error-task { color: #ff6b6b; font-family: var(--font-heading); margin-top: 0.5rem; display: none; text-shadow: 1px 1px 2px black; }
 
         /* Mobile responsiveness */
         @media (max-width: 768px) {
+            .textarea-wide { padding: 1rem; }
             .grid-2col { grid-template-columns: 1fr; gap: 1rem; }
             .img-upload-row { flex-direction: column; align-items: flex-start; }
             .action-buttons { flex-direction: column-reverse; gap: 1rem; }

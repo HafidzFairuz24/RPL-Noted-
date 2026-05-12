@@ -95,9 +95,10 @@
         .btn-action.primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         .btn-action.danger { background: #c0392b; color: white; }
 
-        #error-ws { color: #ff6b6b; font-family: var(--font-heading); margin-top: 0.5rem; display: none; }
+        #error-ws { color: #ff6b6b; font-family: var(--font-heading); margin-top: 0.5rem; display: none; text-shadow: 1px 1px 2px black; }
         /* Mobile responsiveness */
         @media (max-width: 768px) {
+            .textarea-wide { padding: 1rem; }
             .add-member-row { flex-direction: column; }
             .btn-add-member { width: 100%; margin-top: 0.5rem; }
             .img-upload-row { flex-direction: column; align-items: flex-start; }

@@ -148,14 +148,14 @@
         /* Mobile responsiveness */
         @media (max-width: 768px) {
             .task-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
-            .task-action-row { width: 100%; justify-content: space-between; }
+            .task-action-row { width: 100%; justify-content: flex-start; gap: 0.8rem; flex-wrap: wrap; }
             .detail-row { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
             .assignee-row { flex-direction: column; align-items: flex-start; }
             .btn-add-assignee { margin-top: 0.5rem; width: 100%; }
             .file-row { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
             .btn-remove-file { width: 100%; }
             .comment-input-area { flex-direction: column; }
-            .btn-send-comment { padding: 1rem; width: 100%; border-radius: 8px; }
+            .btn-send-comment { padding: 1rem; width: auto; border-radius: 8px; }
             .comment-text { padding-left: 0; text-align: center; font-size: 1.5rem; }
             .comment-actions { position: relative; top: 0; right: 0; margin-top: 1rem; justify-content: flex-end; }
         }

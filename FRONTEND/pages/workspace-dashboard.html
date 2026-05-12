@@ -59,6 +59,13 @@
 
         #loading-msg { font-family: var(--font-heading); color: var(--text-dark); opacity: 0.6; text-align: center; padding: 2rem; }
         #error-ws { color: #c0392b; font-family: var(--font-heading); padding: 1rem; display: none; }
+
+        @media (max-width: 768px) {
+            .workspace-header-banner { padding: 1.5rem; text-align: center; }
+            .btn-edit-ws { position: relative; top: 0; right: 0; width: 100%; margin-top: 1rem; display: block; }
+            .list-bar { padding: 1rem; font-size: 1.2rem; flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .btn-edit-list { margin-left: 0; width: 100%; padding: 0.5rem; }
+        }
     </style>
 </head>
 <script src="../js/api.js"></script>
