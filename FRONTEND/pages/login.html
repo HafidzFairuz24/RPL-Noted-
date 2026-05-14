@@ -35,10 +35,7 @@
     </div>
 
     <script>
-        // Jika sudah login, langsung ke dashboard
-        if (Auth.isLoggedIn()) {
-            window.location.href = 'dashboard.html';
-        }
+        // (Auto-redirect if logged in is removed so users can see the login page or login as a different user)
 
         async function handleLogin() {
             const email    = document.getElementById('email').value.trim();

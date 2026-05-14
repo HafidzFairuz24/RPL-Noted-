@@ -50,10 +50,7 @@
     </div>
 
     <script>
-        // Jika sudah login, langsung ke dashboard
-        if (Auth.isLoggedIn()) {
-            window.location.href = 'dashboard.html';
-        }
+        // (Auto-redirect if logged in is removed so users can see the signup page or signup as a different user)
 
         async function handleSignup() {
             const username = document.getElementById('reg-username').value.trim();
