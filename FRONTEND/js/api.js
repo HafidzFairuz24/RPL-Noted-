@@ -101,6 +101,23 @@ function requireAuth() {
     } else {
         // Cek notifikasi belum dibaca jika sudah login
         checkUnreadNotifications();
+        checkAdminPanel();
+    }
+}
+
+function checkAdminPanel() {
+    const user = Auth.getUser();
+    if (user && user.email === 'hafidzfairuz@gmail.com') {
+        const navMenu = document.querySelector('.nav-menu');
+        // Prevent duplicate injection
+        if (navMenu && !document.getElementById('admin-panel-link-injected')) {
+            const adminLink = document.createElement('a');
+            adminLink.href = 'admin-bugs.html';
+            adminLink.className = 'nav-btn';
+            adminLink.id = 'admin-panel-link-injected';
+            adminLink.textContent = 'Admin Panel';
+            navMenu.appendChild(adminLink);
+        }
     }
 }
 
