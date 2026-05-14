@@ -88,8 +88,10 @@ const NotificationAPI = {
 
 // ── Bug API ───────────────────────────────────────────────────
 const BugAPI = {
-    report: (data) => post('/bugs', data),
-    getAll: ()     => get('/bugs'),
+    report:        (data)        => post('/bugs', data),
+    getAll:        ()            => get('/bugs'),
+    getAdminAll:   ()            => get('/bugs/admin'),
+    updateStatus:  (id, status)  => put(`/bugs/${id}/status`, { status }),
 };
 
 // ── Guard: redirect to login if not authenticated ─────────────

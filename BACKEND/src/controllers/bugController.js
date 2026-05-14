@@ -41,3 +41,45 @@ exports.getAllBugReports = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
+
+exports.getAllBugReportsAdmin = async (req, res) => {
+    try {
+        if (req.user.email !== 'hafidzfairuz@gmail.com') {
+            return res.status(403).json({ success: false, message: 'Forbidden: Admins only.' });
+        }
+
+        const [bugs] = await db.execute(`
+            SELECT b.*, u.username, u.email 
+            FROM bug_reports b
+            JOIN users u ON b.user_id = u.id
+            ORDER BY b.created_at DESC
+        `);
+
+        res.json({ success: true, bugs });
+    } catch (err) {
+        console.error('Error fetching admin bug reports:', err);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+exports.updateBugStatus = async (req, res) => {
+    try {
+        if (req.user.email !== 'hafidzfairuz@gmail.com') {
+            return res.status(403).json({ success: false, message: 'Forbidden: Admins only.' });
+        }
+
+        const { id } = req.params;
+        const { status } = req.body;
+
+        if (!['open', 'resolved', 'closed'].includes(status)) {
+            return res.status(400).json({ success: false, message: 'Invalid status.' });
+        }
+
+        await db.execute('UPDATE bug_reports SET status = ? WHERE id = ?', [status, id]);
+        
+        res.json({ success: true, message: 'Status updated successfully.' });
+    } catch (err) {
+        console.error('Error updating bug status:', err);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};

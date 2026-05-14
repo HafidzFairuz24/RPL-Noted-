@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noted! - Admin Panel (Bug Reports)</title>
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <style>
+        .header-banner { 
+            background-color: var(--primary-red); 
+            color: white; 
+            padding: 1.5rem 2rem; 
+            border-radius: 8px; 
+            font-family: var(--font-heading); 
+            font-size: 1.5rem; 
+            margin-bottom: 3rem; 
+        }
+
+        .bug-table-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-body);
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .status-open { background-color: #e74c3c; }
+        .status-resolved { background-color: #f39c12; }
+        .status-closed { background-color: #27ae60; }
+
+        select.status-dropdown {
+            padding: 4px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .btn-update {
+            padding: 4px 8px;
+            background-color: var(--primary-red);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .btn-update:hover { background-color: #c0392b; }
+
+        #error-msg {
+            color: red;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<script src="../js/api.js"></script>
+<body>
+    <aside class="sidebar">
+        <h1 class="logo">Noted!</h1>
+        <nav class="nav-menu">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <img id="sidebar-avatar" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3); display: none; margin: 0 auto 0.5rem auto;">
+            </div>
+            <a href="dashboard.html" class="nav-btn">Main Dashboard</a>
+            <a href="profile.html" class="nav-btn">Profile</a>
+            <a href="notification.html" class="nav-btn" id="nav-notification">Notification <span id="notif-badge" style="display:none; width:10px; height:10px; background:red; border-radius:50%; margin-left:5px;"></span></a>
+            <a href="report-bug.html" class="nav-btn">Report a Bug</a>
+            <a href="admin-bugs.html" class="nav-btn active" id="admin-panel-link">Admin Panel</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="nav-btn" style="display: block;" onclick="Auth.logout()">Log Out</a>
+        </div>
+    </aside>
+
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <main class="main-content">
+        <div class="header-banner">
+            <h2>Admin Panel: Bug Reports</h2>
+        </div>
+
+        <p id="error-msg"></p>
+        
+        <div class="bug-table-container">
+            <table id="bug-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="bug-tbody">
+                    <tr><td colspan="6" style="text-align: center;">Loading bug reports...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        requireAuth();
+
+        const user = Auth.getUser();
+        if (user) {
+            // Kick out if not admin
+            if (user.email !== 'hafidzfairuz@gmail.com') {
+                alert("Access Denied. Admins only.");
+                window.location.href = 'dashboard.html';
+            }
+
+            const avatarEl = document.getElementById('sidebar-avatar');
+            const finalAvatar = user.profile_picture || localStorage.getItem('noted_avatar');
+            if (finalAvatar) {
+                avatarEl.src = finalAvatar;
+                avatarEl.style.display = 'block';
+            } else {
+                avatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username || 'User')}&background=random`;
+                avatarEl.style.display = 'block';
+            }
+        }
+
+        async function loadAdminBugs() {
+            const tbody = document.getElementById('bug-tbody');
+            const errorMsg = document.getElementById('error-msg');
+            
+            try {
+                const res = await BugAPI.getAdminAll();
+                const bugs = res.bugs || [];
+
+                if (bugs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No bug reports found.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                bugs.forEach(bug => {
+                    const tr = document.createElement('tr');
+                    
+                    const date = new Date(bug.created_at).toLocaleString();
+                    
+                    tr.innerHTML = `
+                        <td>${date}</td>
+                        <td>${bug.username} <br><small>${bug.email}</small></td>
+                        <td><strong>${bug.title}</strong></td>
+                        <td style="max-width: 300px; word-wrap: break-word;">${bug.description}</td>
+                        <td><span class="status-badge status-${bug.status}">${bug.status.toUpperCase()}</span></td>
+                        <td>
+                            <select class="status-dropdown" id="status-${bug.id}">
+                                <option value="open" ${bug.status === 'open' ? 'selected' : ''}>Open</option>
+                                <option value="resolved" ${bug.status === 'resolved' ? 'selected' : ''}>Resolved</option>
+                                <option value="closed" ${bug.status === 'closed' ? 'selected' : ''}>Closed</option>
+                            </select>
+                            <button class="btn-update" onclick="updateBug(${bug.id})">Update</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                errorMsg.textContent = "Failed to load bugs: " + (err.message || 'Server error');
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        window.updateBug = async function(id) {
+            const status = document.getElementById(`status-${id}`).value;
+            const errorMsg = document.getElementById('error-msg');
+            try {
+                await BugAPI.updateStatus(id, status);
+                // Reload list
+                loadAdminBugs();
+            } catch (err) {
+                errorMsg.textContent = "Failed to update bug: " + (err.message || 'Server error');
+                errorMsg.style.display = 'block';
+                setTimeout(() => { errorMsg.style.display = 'none'; }, 3000);
+            }
+        };
+
+        loadAdminBugs();
+    </script>
+</body>
+</html>
