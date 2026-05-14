@@ -255,4 +255,28 @@ const deleteTask = async (req, res) => {
     }
 };
 
-module.exports = { getTasks, getTask, createTask, updateTask, deleteTask };
+// ── GET /api/tasks/me ─────────────────────────────────────────────────────────
+const getMyTasks = async (req, res) => {
+    try {
+        const [rows] = await db.execute(
+            `SELECT t.*,
+                    l.name AS list_name,
+                    w.name AS workspace_name,
+                    w.id AS workspace_id
+             FROM tasks t
+             JOIN lists l ON l.id = t.list_id
+             JOIN workspaces w ON w.id = l.workspace_id
+             LEFT JOIN task_assignees ta ON ta.task_id = t.id
+             WHERE ta.user_id = ? OR t.created_by = ?
+             GROUP BY t.id
+             ORDER BY t.status ASC, t.due_date ASC, t.created_at DESC`,
+            [req.user.id, req.user.id]
+        );
+        res.json({ success: true, tasks: rows });
+    } catch (err) {
+        console.error('Error in getMyTasks:', err);
+        res.status(500).json({ success: false, message: 'Server error.' });
+    }
+};
+
+module.exports = { getTasks, getTask, createTask, updateTask, deleteTask, getMyTasks };

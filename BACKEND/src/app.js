@@ -66,6 +66,7 @@ const authRoutes         = require('./routes/auth');
 const workspaceRoutes    = require('./routes/workspaces');
 const listRoutes         = require('./routes/lists');
 const taskRoutes         = require('./routes/tasks');
+const globalTaskRoutes   = require('./routes/globalTasks');
 const notificationRoutes = require('./routes/notifications');
 const bugRoutes          = require('./routes/bugs');
 
@@ -77,6 +78,9 @@ app.use('/api/workspaces/:workspaceId/lists', listRoutes);
 
 // Tasks are nested under list (standalone path for flexibility)
 app.use('/api/lists/:listId/tasks', taskRoutes);
+
+// Global tasks (e.g. /api/tasks/me)
+app.use('/api/tasks', globalTaskRoutes);
 
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/bugs',          bugRoutes);

@@ -69,6 +69,7 @@ const TaskAPI = {
     create:  (listId, data)  => post(`/lists/${listId}/tasks`, data),
     update:  (listId, id, data) => put(`/lists/${listId}/tasks/${id}`, data),
     delete:  (listId, id)    => del(`/lists/${listId}/tasks/${id}`),
+    getMyTasks: ()           => get('/tasks/me'),
 };
 
 // ── Comment API ───────────────────────────────────────────────
