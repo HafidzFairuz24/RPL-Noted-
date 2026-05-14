@@ -86,6 +86,12 @@ const NotificationAPI = {
     delete:      (id) => del(`/notifications/${id}`),
 };
 
+// ── Bug API ───────────────────────────────────────────────────
+const BugAPI = {
+    report: (data) => post('/bugs', data),
+    getAll: ()     => get('/bugs'),
+};
+
 // ── Guard: redirect to login if not authenticated ─────────────
 function requireAuth() {
     if (!Auth.isLoggedIn()) {

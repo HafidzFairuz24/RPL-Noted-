@@ -24,6 +24,25 @@ async function updateDb() {
             }
         }
 
+        // Create bug_reports table
+        try {
+            await pool.execute(`
+                CREATE TABLE IF NOT EXISTS bug_reports (
+                    id          INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id     INT          NOT NULL,
+                    title       VARCHAR(200) NOT NULL,
+                    description TEXT         NOT NULL,
+                    status      ENUM('open', 'resolved', 'closed') DEFAULT 'open',
+                    created_at  DATETIME     DEFAULT CURRENT_TIMESTAMP,
+                    updated_at  DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                )
+            `);
+            console.log('Successfully ensured bug_reports table exists.');
+        } catch (err) {
+            console.error('Error ensuring bug_reports table:', err.message);
+        }
+
         console.log('Database update finished.');
         process.exit(0);
     } catch (err) {

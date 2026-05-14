@@ -41,6 +41,24 @@ const db = require('./config/db');
             console.error('Database migration failed:', err.message);
         }
     }
+
+    try {
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS bug_reports (
+                id          INT AUTO_INCREMENT PRIMARY KEY,
+                user_id     INT          NOT NULL,
+                title       VARCHAR(200) NOT NULL,
+                description TEXT         NOT NULL,
+                status      ENUM('open', 'resolved', 'closed') DEFAULT 'open',
+                created_at  DATETIME     DEFAULT CURRENT_TIMESTAMP,
+                updated_at  DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        `);
+        console.log('Database migrated: bug_reports table ensured.');
+    } catch (err) {
+        console.error('Database migration for bug_reports failed:', err.message);
+    }
 })();
 
 // ── Routes ────────────────────────────────────────────────────────────────────
@@ -49,6 +67,7 @@ const workspaceRoutes    = require('./routes/workspaces');
 const listRoutes         = require('./routes/lists');
 const taskRoutes         = require('./routes/tasks');
 const notificationRoutes = require('./routes/notifications');
+const bugRoutes          = require('./routes/bugs');
 
 app.use('/api/auth',          authRoutes);
 app.use('/api/workspaces',    workspaceRoutes);
@@ -60,6 +79,7 @@ app.use('/api/workspaces/:workspaceId/lists', listRoutes);
 app.use('/api/lists/:listId/tasks', taskRoutes);
 
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/bugs',          bugRoutes);
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

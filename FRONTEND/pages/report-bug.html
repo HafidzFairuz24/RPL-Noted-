@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noted! - Report a Bug</title>
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <style>
+        .header-banner { 
+            background-color: var(--primary-red); 
+            color: white; 
+            padding: 1.5rem 2rem; 
+            border-radius: 8px; 
+            font-family: var(--font-heading); 
+            font-size: 1.5rem; 
+            margin-bottom: 3rem; 
+        }
+        
+        .form-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 600px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-red);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-submit:hover {
+            background-color: #c0392b;
+        }
+
+        #success-msg {
+            color: green;
+            margin-top: 1rem;
+            display: none;
+            font-weight: bold;
+        }
+
+        #error-msg {
+            color: red;
+            margin-top: 1rem;
+            display: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<script src="../js/api.js"></script>
+<body>
+    <aside class="sidebar">
+        <h1 class="logo">Noted!</h1>
+        <nav class="nav-menu">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <img id="sidebar-avatar" alt="Avatar" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.3); display: none; margin: 0 auto 0.5rem auto;">
+            </div>
+            <a href="dashboard.html" class="nav-btn">Main Dashboard</a>
+            <a href="profile.html" class="nav-btn">Profile</a>
+            <a href="notification.html" class="nav-btn" id="nav-notification">Notification <span id="notif-badge" style="display:none; width:10px; height:10px; background:red; border-radius:50%; margin-left:5px;"></span></a>
+            <a href="report-bug.html" class="nav-btn active">Report a Bug</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="nav-btn" style="display: block;" onclick="Auth.logout()">Log Out</a>
+        </div>
+    </aside>
+
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <main class="main-content">
+        <div class="header-banner">
+            <h2>Report a Bug</h2>
+        </div>
+
+        <div class="form-container">
+            <form id="bug-form">
+                <div class="form-group">
+                    <label for="bug-title">Bug Title / Issue Summary</label>
+                    <input type="text" id="bug-title" placeholder="e.g. Cannot create a new workspace" required>
+                </div>
+                <div class="form-group">
+                    <label for="bug-desc">Detailed Description</label>
+                    <textarea id="bug-desc" placeholder="Please describe what happened, what you expected to happen, and steps to reproduce..." required></textarea>
+                </div>
+                <button type="submit" class="btn-submit" id="submit-btn">Submit Report</button>
+                <p id="success-msg">Thank you! Your bug report has been submitted.</p>
+                <p id="error-msg"></p>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        requireAuth();
+
+        const user = Auth.getUser();
+        if (user) {
+            const avatarEl = document.getElementById('sidebar-avatar');
+            const finalAvatar = user.profile_picture || localStorage.getItem('noted_avatar');
+            if (finalAvatar) {
+                avatarEl.src = finalAvatar;
+                avatarEl.style.display = 'block';
+            } else {
+                avatarEl.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username || 'User')}&background=random`;
+                avatarEl.style.display = 'block';
+            }
+        }
+
+        document.getElementById('bug-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const title = document.getElementById('bug-title').value.trim();
+            const description = document.getElementById('bug-desc').value.trim();
+            const btn = document.getElementById('submit-btn');
+            const successMsg = document.getElementById('success-msg');
+            const errorMsg = document.getElementById('error-msg');
+
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
+
+            if (!title || !description) return;
+
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+
+            try {
+                await BugAPI.report({ title, description });
+                successMsg.style.display = 'block';
+                document.getElementById('bug-form').reset();
+            } catch (err) {
+                errorMsg.textContent = err.message || 'Failed to submit bug report.';
+                errorMsg.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Submit Report';
+            }
+        });
+    </script>
+</body>
+</html>
